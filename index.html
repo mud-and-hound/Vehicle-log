@@ -258,7 +258,7 @@ function ic(name){ return (SVGICONS[name]||'').toString(); }
 function paintIcon(el, name){ el.innerHTML = ic(name); el.setAttribute('viewBox','0 0 24 24'); }
 
 /* ====== ตั้งค่าการเชื่อมต่อ ====== */
-const CONFIG = { APPS_SCRIPT_URL: '' }; // <-- วาง Web App URL จาก Google Apps Script ที่นี่หลัง deploy Code.gs
+const CONFIG = { APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzWuClbf8hyqnxLdYZKWL-gFRSKucuKal-Lb1sBN4sxdiT26KSAXUk_mp9K-ul_KcI/exec' };
 
 const PLATES = { A: '3ฒ-7643', B: '3ฒภ-8066' };
 const PURPOSES = ['เปิดร้าน','ปิดร้าน','ซ่อมบำรุง','เก็บอุปกรณ์','ติดตั้ง/เปลี่ยนอุปกรณ์ POS','ตรวจเช็คระบบ','ประชุม/อบรม','อื่นๆ'];
