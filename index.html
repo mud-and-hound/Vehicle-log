@@ -586,12 +586,12 @@ function openEdit(id){
   if(!t) return;
   editingId = id;
   document.getElementById('sheetTitle').textContent = 'แก้ไขรายการ';
-  document.getElementById('f_outDate').value = t.OutDate||'';
+  document.getElementById('f_outDate').value = (t.OutDate||'').slice(0,10);
   document.getElementById('f_userOut').value = t.UserOut||'';
   setFormBrand(t.Brand||'GD');
   document.getElementById('f_dest').value = destDisplayValue(t.Brand||'GD', t.DestCode, t.DestName);
   document.getElementById('f_purposeDetail').value = t.PurposeDetail||'';
-  document.getElementById('f_inDate').value = t.InDate||'';
+  document.getElementById('f_inDate').value = (t.InDate||'').slice(0,10);
   document.getElementById('f_userIn').value = t.UserIn||'';
   document.getElementById('f_mStart').value = t.MileageStart ?? '';
   document.getElementById('f_mEnd').value = t.MileageEnd ?? '';
