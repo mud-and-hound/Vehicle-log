@@ -247,7 +247,7 @@ input::placeholder{color:var(--tx3)}
           <button type="button" data-brand="GHC">GHC</button>
           <button type="button" data-brand="ABP">ABP</button>
         </div>
-        <input type="text" id="f_dest" list="destList" placeholder="พิมพ์ค้นหาสาขา เช่น Chidlom, Paragon" required autocomplete="off">
+        <input type="text" id="f_dest" list="destList" placeholder="พิมพ์ชื่อสาขาหรือเลขสาขา เช่น Chidlom หรือ CL" required autocomplete="off">
         <datalist id="destList"></datalist>
         <div style="font-size:11px;color:var(--tx3);margin-top:5px" id="destCount"></div>
       </div>
@@ -353,10 +353,19 @@ async function apiDelete(id){
 function populateDestList(brand){
   const dl = document.getElementById('destList');
   const list = BRANCHES.filter(b=>b.brand===brand);
-  dl.innerHTML = list.map(b=>`<option value="${escapeHtml(b.name)}">`).join('');
-  document.getElementById('destCount').textContent = `${list.length.toLocaleString()} สาขาในแบรนด์ ${brand}`;
+  dl.innerHTML = list.map(b=>`<option value="${escapeHtml(b.code)} - ${escapeHtml(b.name)}">`).join('');
+  document.getElementById('destCount').textContent = `${list.length.toLocaleString()} สาขาในแบรนด์ ${brand} · พิมพ์ค้นหาได้ทั้งชื่อสาขาหรือเลขสาขา`;
 }
-function findBranch(brand, name){ return BRANCHES.find(b=>b.brand===brand && b.name.toLowerCase()===String(name).toLowerCase()); }
+function findBranch(brand, raw){
+  const s = String(raw).trim().toLowerCase();
+  const inBrand = BRANCHES.filter(b=>b.brand===brand);
+  // ตรงกับรูปแบบ "รหัส - ชื่อ" ที่เลือกจาก dropdown เป๊ะๆ
+  let hit = inBrand.find(b => `${b.code} - ${b.name}`.toLowerCase() === s);
+  if(hit) return hit;
+  // พิมพ์แค่รหัสสาขา หรือแค่ชื่อสาขาเฉยๆ ก็ยังจับคู่ได้
+  hit = inBrand.find(b => b.code.toLowerCase() === s || b.name.toLowerCase() === s);
+  return hit || null;
+}
 
 function purposeChipsRender(selected){
   const box = document.getElementById('purposeChips');
@@ -535,7 +544,7 @@ function openEdit(id){
   document.getElementById('f_outDate').value = t.OutDate||'';
   document.getElementById('f_userOut').value = t.UserOut||'';
   setFormBrand(t.Brand||'GD');
-  document.getElementById('f_dest').value = t.DestName||'';
+  document.getElementById('f_dest').value = t.DestCode ? `${t.DestCode} - ${t.DestName||''}` : (t.DestName||'');
   document.getElementById('f_purposeDetail').value = t.PurposeDetail||'';
   document.getElementById('f_inDate').value = t.InDate||'';
   document.getElementById('f_userIn').value = t.UserIn||'';
@@ -638,8 +647,9 @@ async function init(){
   document.getElementById('tripForm').addEventListener('submit', async (e)=>{
     e.preventDefault();
     const plate = document.getElementById('platePick').dataset.value || 'A';
-    const destName = document.getElementById('f_dest').value.trim();
-    const branch = findBranch(formBrand, destName);
+    const destRaw = document.getElementById('f_dest').value.trim();
+    const branch = findBranch(formBrand, destRaw);
+    const destName = branch ? branch.name : destRaw;
     const mStartRaw = document.getElementById('f_mStart').value;
     const mEndRaw = document.getElementById('f_mEnd').value;
     const payload = {
