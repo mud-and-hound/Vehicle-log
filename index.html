@@ -8,19 +8,24 @@
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  /* ===== Palette: 2 กลาง + 1 เน้น, สัดส่วน 60-30-10 ===== */
-  --ink:#121317;            /* 60% พื้นหลังหลัก */
-  --panel:#1b1c22;          /* 30% แบ่งโซน/การ์ด */
-  --line:#2b2c33;
-  --tx:#eceef2; --tx2:#9a9ca6; --tx3:#63656f;
-  --amber:#ffb020; --amber-ink:#1a1305;  /* 10% จุดเดียวที่ดึงสายตา */
-  --bad:#ff6b6b;
+  /* ===== Palette: Warm Sand — 2 กลาง + 1 เน้น, สัดส่วน 60-30-10 ===== */
+  --ink:#f4efe6;            /* 60% พื้นหลังหลัก */
+  --panel:#fffdf9;          /* 30% แบ่งโซน/การ์ด */
+  --line:#e6dcc9;
+  --tx:#3a2f22; --tx2:#7a6a55; --tx3:#a4927a;
+  --amber:#a5643a; --amber-ink:#ffffff;  /* 10% จุดเดียวที่ดึงสายตา */
+  --bad:#b3462b;
   --r1:16px; --r2:12px; --r3:9px;
   --sans:'Prompt',sans-serif; --mono:'JetBrains Mono',monospace;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--ink);color:var(--tx);font-family:var(--sans)}
 body{padding-bottom:100px}
+@media (min-width:680px){
+  body{display:flex;flex-direction:column;align-items:center}
+  .hero,.controls,.cal-wrap,.list,.setup-note{width:100%;max-width:560px}
+  .fab{position:fixed}
+}
 button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:inherit}
 button:active{opacity:.8}
 input,select,textarea{font-family:var(--sans);background:var(--panel);border:1px solid var(--line);border-radius:var(--r3);padding:11px 12px;color:var(--tx);font-size:15px;width:100%;outline:none}
@@ -96,6 +101,25 @@ input::placeholder{color:var(--tx3)}
 .meta{margin-top:2px}
 .meta b{color:var(--tx2);font-weight:500}
 .meta .dist{margin-left:auto;font-family:var(--mono);color:var(--amber);font-weight:600}
+
+/* ---------- Table rows (สไตล์ที่เลือก: ลำดับ/สาขา/แบรนด์/ผู้ใช้/ไมค์รวม) ---------- */
+.tbl{background:var(--panel);border:1px solid var(--line);border-radius:var(--r2);overflow:hidden}
+.tbl-head{display:grid;grid-template-columns:26px 1fr 48px 60px 74px 26px;gap:8px;padding:9px 12px;font-size:10px;color:var(--tx3);letter-spacing:.03em;border-bottom:1px solid var(--line)}
+.trow{display:grid;grid-template-columns:26px 1fr 48px 60px 74px 26px;gap:8px;align-items:center;padding:9px 12px;border-bottom:1px solid var(--line);cursor:pointer}
+.trow:last-child{border-bottom:none}
+.trow:hover{background:var(--ink)}
+.trow-seq{font-family:var(--mono);font-size:11px;color:var(--tx3)}
+.trow-dest-main{font-size:12.5px;font-weight:500;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trow-dest-sub{font-family:var(--mono);font-size:10px;color:var(--tx3);margin-top:2px}
+.trow-brand,.trow-user{font-size:11px;color:var(--tx2);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trow-km{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--amber);text-align:right}
+.trow-del{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--tx3)}
+.trow-del:hover{background:var(--line);color:var(--bad)}
+.trow-del .ic{width:13px;height:13px}
+@media (max-width:480px){
+  .tbl-head,.trow{grid-template-columns:22px 1fr 44px 60px 24px}
+  .trow-brand{display:none}
+}
 
 .card-actions{display:flex;border-top:1px solid var(--line)}
 .card-actions button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;font-size:12px;color:var(--tx3)}
@@ -429,32 +453,43 @@ function render(){
     box.innerHTML = `<div class="empty"><svg class="ic" viewBox="0 0 24 24">${ic('route')}</svg><b>ยังไม่มีบันทึกช่วงนี้</b>กดปุ่ม + เพื่อเพิ่มการเดินทาง</div>`;
     return;
   }
-  box.innerHTML = viewTrips.map((t,i)=>{
-    const dist = distOf(t);
-    return `
-    <div class="card" data-id="${t.ID}">
-      <div class="card-top">
-        <span class="tag">#${String(i+1).padStart(2,'0')} · ${t.Brand}</span>
-        <span class="tag">${PLATES[t.Plate]||'-'}</span>
+  box.innerHTML = `
+    <div class="tbl">
+      <div class="tbl-head">
+        <span>#</span><span>สาขา (รหัส-ชื่อ-รายการ)</span><span class="trow-brand" style="text-align:center">แบรนด์</span><span style="text-align:center">ผู้ใช้</span><span style="text-align:right">ไมค์รวม</span><span></span>
       </div>
-      <div class="route">
-        <div class="route-line"><svg class="ic" viewBox="0 0 24 24">${ic('shop')}</svg>Office / Mud</div>
-        <div class="route-line dest"><svg class="ic" viewBox="0 0 24 24">${ic('map-pin')}</svg><b>${escapeHtml(t.DestName||'-')}</b></div>
-      </div>
-      <div class="meta">
-        <span><b>${escapeHtml(t.UserOut||'-')}</b> · ${fmtDate(t.OutDate)} <svg class="ic" viewBox="0 0 24 24" style="width:10px;height:10px">${ic('arrow-small-right')}</svg> ${fmtDate(t.InDate)}</span>
-        <span class="mono">${t.MileageStart??'-'} <svg class="ic" viewBox="0 0 24 24" style="width:10px;height:10px">${ic('arrow-small-right')}</svg> ${t.MileageEnd??'-'}</span>
-        ${dist?`<span class="dist">${dist.toLocaleString()} กม.</span>`:''}
-      </div>
-      <div class="card-actions">
-        <button class="edit"><svg class="ic" viewBox="0 0 24 24">${ic('pencil')}</svg>แก้ไข</button>
-        <button class="del"><svg class="ic" viewBox="0 0 24 24">${ic('trash')}</svg>ลบ</button>
-      </div>
+      ${viewTrips.map((t,i)=>{
+        const dist = distOf(t);
+        const destLabel = [t.DestCode, t.DestName, t.PurposeType].filter(Boolean).join(' - ');
+        const mRange = (t.MileageStart!=null && t.MileageStart!=='' && t.MileageEnd!=null && t.MileageEnd!=='')
+          ? `${Number(t.MileageStart).toLocaleString()} → ${Number(t.MileageEnd).toLocaleString()}` : 'ยังไม่ระบุไมค์';
+        return `
+        <div class="trow" data-id="${t.ID}">
+          <span class="trow-seq">${String(i+1).padStart(2,'0')}</span>
+          <span>
+            <div class="trow-dest-main">${escapeHtml(destLabel || '-')}</div>
+            <div class="trow-dest-sub">${mRange}${dist?` · รวม ${dist.toLocaleString()} กม.`:''}</div>
+          </span>
+          <span class="trow-brand">${escapeHtml(t.Brand||'-')}</span>
+          <span class="trow-user">${escapeHtml(t.UserOut||'-')}</span>
+          <span class="trow-km">${dist ? dist.toLocaleString()+' กม.' : '-'}</span>
+          <button class="trow-del" title="ลบทริปนี้"><svg class="ic" viewBox="0 0 24 24">${ic('trash')}</svg></button>
+        </div>`;
+      }).join('')}
     </div>`;
-  }).join('');
 
-  box.querySelectorAll('.card .edit').forEach(btn=>{ btn.onclick=(e)=>openEdit(e.target.closest('.card').dataset.id); });
-  box.querySelectorAll('.card .del').forEach(btn=>{ btn.onclick=(e)=>deleteTrip(e.target.closest('.card').dataset.id, e.target.closest('button')); });
+  box.querySelectorAll('.trow').forEach(rowEl=>{
+    rowEl.addEventListener('click', (e)=>{
+      if(e.target.closest('.trow-del')) return;
+      openEdit(rowEl.dataset.id);
+    });
+  });
+  box.querySelectorAll('.trow-del').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      deleteTrip(btn.closest('.trow').dataset.id, btn);
+    });
+  });
 }
 
 async function deleteTrip(id, btnEl){
@@ -555,7 +590,12 @@ async function init(){
   if(isDemo){ seedDemo(); }
   else{
     document.getElementById('modeBadge').style.display='none';
-    trips = await apiGetTrips();
+    try{
+      trips = await apiGetTrips();
+    }catch(e){
+      trips = [];
+      showToast('เชื่อมต่อ Google Sheet ไม่ได้ตอนนี้ เช็คอินเทอร์เน็ตแล้วรีเฟรชอีกครั้ง');
+    }
     try{
       const r = await fetch(CONFIG.APPS_SCRIPT_URL + '?action=branches');
       const j = await r.json();
@@ -621,7 +661,7 @@ async function init(){
     const saveBtn = document.getElementById('saveBtn');
     const saveBtnOriginal = saveBtn.innerHTML;
     saveBtn.disabled = true;
-    saveBtn.innerHTML = '<span class="spin-sm"></span> กำลังบันทึก';
+    saveBtn.innerHTML = '<span class="spin-sm"></span> กำลังบันทึกลง Google Sheet...';
     try{
       const isEdit = !!editingId;
       if(editingId){ payload.ID = editingId; await apiUpdate(payload); }
