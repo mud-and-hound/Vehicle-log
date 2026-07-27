@@ -353,18 +353,22 @@ async function apiDelete(id){
 function populateDestList(brand){
   const dl = document.getElementById('destList');
   const list = BRANCHES.filter(b=>b.brand===brand);
-  dl.innerHTML = list.map(b=>`<option value="${escapeHtml(b.code)} - ${escapeHtml(b.name)}">`).join('');
-  document.getElementById('destCount').textContent = `${list.length.toLocaleString()} สาขาในแบรนด์ ${brand} · พิมพ์ค้นหาได้ทั้งชื่อสาขาหรือเลขสาขา`;
+  dl.innerHTML = list.map(b=>`<option value="${escapeHtml(b.shopId)} - ${escapeHtml(b.code)} - ${escapeHtml(b.name)}">`).join('');
+  document.getElementById('destCount').textContent = `${list.length.toLocaleString()} สาขาในแบรนด์ ${brand} · ค้นหาได้ทั้งเลขสาขา, ชื่อย่อ, หรือชื่อเต็ม`;
 }
 function findBranch(brand, raw){
   const s = String(raw).trim().toLowerCase();
   const inBrand = BRANCHES.filter(b=>b.brand===brand);
-  // ตรงกับรูปแบบ "รหัส - ชื่อ" ที่เลือกจาก dropdown เป๊ะๆ
-  let hit = inBrand.find(b => `${b.code} - ${b.name}`.toLowerCase() === s);
+  // ตรงกับรูปแบบ "Shop ID - Code - Name" ที่เลือกจาก dropdown เป๊ะๆ
+  let hit = inBrand.find(b => `${b.shopId} - ${b.code} - ${b.name}`.toLowerCase() === s);
   if(hit) return hit;
-  // พิมพ์แค่รหัสสาขา หรือแค่ชื่อสาขาเฉยๆ ก็ยังจับคู่ได้
-  hit = inBrand.find(b => b.code.toLowerCase() === s || b.name.toLowerCase() === s);
+  // พิมพ์แค่เลขสาขา หรือแค่ชื่อย่อ หรือแค่ชื่อเต็มเฉยๆ ก็ยังจับคู่ได้
+  hit = inBrand.find(b => b.shopId.toLowerCase() === s || b.code.toLowerCase() === s || b.name.toLowerCase() === s);
   return hit || null;
+}
+function destDisplayValue(brand, code, name){
+  const b = BRANCHES.find(x=>x.brand===brand && x.code===code && x.name===name);
+  return b ? `${b.shopId} - ${b.code} - ${b.name}` : (name||'');
 }
 
 function purposeChipsRender(selected){
@@ -544,7 +548,7 @@ function openEdit(id){
   document.getElementById('f_outDate').value = t.OutDate||'';
   document.getElementById('f_userOut').value = t.UserOut||'';
   setFormBrand(t.Brand||'GD');
-  document.getElementById('f_dest').value = t.DestCode ? `${t.DestCode} - ${t.DestName||''}` : (t.DestName||'');
+  document.getElementById('f_dest').value = destDisplayValue(t.Brand||'GD', t.DestCode, t.DestName);
   document.getElementById('f_purposeDetail').value = t.PurposeDetail||'';
   document.getElementById('f_inDate').value = t.InDate||'';
   document.getElementById('f_userIn').value = t.UserIn||'';
