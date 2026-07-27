@@ -178,6 +178,10 @@ let searchQ = '';
 let editingKey = null; // {brand, shopId} ของแถวที่กำลังแก้ไข
 
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function padShopId(id){
+  const s = String(id);
+  return /^\d+$/.test(s) ? s.padStart(4,'0') : s;
+}
 function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2400); }
 
 async function apiGetBranches(){
@@ -216,7 +220,7 @@ function render(){
   if(curBrand!=='ALL') list = list.filter(b=>b.brand===curBrand);
   if(searchQ){
     const q = searchQ.toLowerCase();
-    list = list.filter(b => String(b.shopId).toLowerCase().includes(q) || String(b.code).toLowerCase().includes(q) || String(b.name).toLowerCase().includes(q));
+    list = list.filter(b => String(b.shopId).toLowerCase().includes(q) || padShopId(b.shopId).toLowerCase().includes(q) || String(b.code).toLowerCase().includes(q) || String(b.name).toLowerCase().includes(q));
   }
   list = list.slice(0, 300); // กันเรนเดอร์หนักเกินไปตอนค้นหากว้างๆ
 
@@ -229,7 +233,7 @@ function render(){
     <div class="tbl-head"><span>เลขสาขา</span><span>รหัส - ชื่อ</span><span style="text-align:center">แบรนด์</span><span></span></div>
     ${list.map(b => `
       <div class="brow" data-brand="${escapeHtml(b.brand)}" data-shopid="${escapeHtml(b.shopId)}">
-        <span class="brow-shopid">${escapeHtml(b.shopId)}</span>
+        <span class="brow-shopid">${escapeHtml(padShopId(b.shopId))}</span>
         <span class="brow-main"><span class="brow-code">${escapeHtml(b.code)}</span> <span class="brow-name">${escapeHtml(b.name)}</span></span>
         <span class="brow-brand">${escapeHtml(b.brand)}</span>
         <span class="brow-actions">
@@ -273,7 +277,7 @@ function openEdit(brand, shopId){
   editingKey = { brand, shopId };
   document.getElementById('sheetTitle').textContent = 'แก้ไขสาขา';
   setBrandPick(b.brand);
-  document.getElementById('f_shopId').value = b.shopId;
+  document.getElementById('f_shopId').value = padShopId(b.shopId);
   document.getElementById('f_code').value = b.code;
   document.getElementById('f_name').value = b.name;
   document.getElementById('overlay').classList.add('open');
@@ -341,14 +345,18 @@ async function init(){
     const brand = document.getElementById('brandPick').dataset.value || 'GD';
     const payload = {
       brand,
-      shopId: document.getElementById('f_shopId').value.trim(),
+      shopId: padShopId(document.getElementById('f_shopId').value.trim()),
       code: document.getElementById('f_code').value.trim(),
       name: document.getElementById('f_name').value.trim(),
     };
     if(!payload.shopId || !payload.code || !payload.name){ showToast('กรอกข้อมูลให้ครบก่อนนะ'); return; }
 
-    const dup = BRANCHES.find(b => b.brand===payload.brand && b.shopId===payload.shopId &&
-      !(editingKey && editingKey.brand===payload.brand && editingKey.shopId===payload.shopId));
+    const dup = BRANCHES.find(b => {
+      if(b.brand !== payload.brand) return false;
+      if(padShopId(b.shopId) !== payload.shopId) return false;
+      if(editingKey && editingKey.brand===b.brand && editingKey.shopId===b.shopId) return false;
+      return true;
+    });
     if(dup){ showToast(`เลขสาขา ${payload.shopId} มีอยู่แล้วในแบรนด์ ${payload.brand}`); return; }
 
     const saveBtn = document.getElementById('saveBtn');
