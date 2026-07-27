@@ -19,7 +19,7 @@
   --sans:'Prompt',sans-serif; --mono:'JetBrains Mono',monospace;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;background:var(--ink);color:var(--tx);font-family:var(--sans)}
+html,body{margin:0;background:var(--ink);color:var(--tx);font-family:var(--sans);overflow-x:hidden}
 body{padding-bottom:100px}
 @media (min-width:680px){
   body{display:flex;flex-direction:column;align-items:center}
@@ -104,21 +104,29 @@ input::placeholder{color:var(--tx3)}
 
 /* ---------- Table rows (สไตล์ที่เลือก: ลำดับ/สาขา/แบรนด์/ผู้ใช้/ไมค์รวม) ---------- */
 .tbl{background:var(--panel);border:1px solid var(--line);border-radius:var(--r2);overflow:hidden}
-.tbl-head{display:grid;grid-template-columns:26px 1fr 48px 60px 74px 26px;gap:8px;padding:9px 12px;font-size:10px;color:var(--tx3);letter-spacing:.03em;border-bottom:1px solid var(--line)}
-.trow{display:grid;grid-template-columns:26px 1fr 48px 60px 74px 26px;gap:8px;align-items:center;padding:9px 12px;border-bottom:1px solid var(--line);cursor:pointer}
+.tbl-head{display:grid;grid-template-columns:24px 1fr 44px 52px 58px 24px;gap:6px;padding:9px 10px;font-size:10px;color:var(--tx3);letter-spacing:.03em;border-bottom:1px solid var(--line)}
+.trow{display:grid;grid-template-columns:24px 1fr 44px 52px 58px 24px;gap:6px;align-items:center;padding:9px 10px;border-bottom:1px solid var(--line);cursor:pointer}
+.tbl-head>*,.trow>*{min-width:0}
 .trow:last-child{border-bottom:none}
 .trow:hover{background:var(--ink)}
 .trow-seq{font-family:var(--mono);font-size:11px;color:var(--tx3)}
 .trow-dest-main{font-size:12.5px;font-weight:500;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.trow-dest-sub{font-family:var(--mono);font-size:10px;color:var(--tx3);margin-top:2px}
+.trow-dest-sub{font-family:var(--mono);font-size:10px;color:var(--tx3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .trow-brand,.trow-user{font-size:11px;color:var(--tx2);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.trow-km{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--amber);text-align:right}
-.trow-del{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--tx3)}
+.trow-km{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;line-height:1.25;overflow:hidden}
+.trow-km .num{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--amber);white-space:nowrap}
+.trow-km .unit{font-size:8.5px;color:var(--tx3);white-space:nowrap}
+.trow-del{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;color:var(--tx3);flex-shrink:0}
 .trow-del:hover{background:var(--line);color:var(--bad)}
 .trow-del .ic{width:13px;height:13px}
 @media (max-width:480px){
-  .tbl-head,.trow{grid-template-columns:22px 1fr 44px 60px 24px}
+  .tbl-head,.trow{grid-template-columns:20px 1fr 46px 50px 22px}
   .trow-brand{display:none}
+}
+@media (max-width:360px){
+  .tbl-head,.trow{grid-template-columns:18px 1fr 42px 46px 20px;gap:5px;padding:8px}
+  .trow-user{font-size:10px}
+  .trow-km .num{font-size:11px}
 }
 
 .card-actions{display:flex;border-top:1px solid var(--line)}
@@ -519,7 +527,7 @@ function render(){
           </span>
           <span class="trow-brand">${escapeHtml(t.Brand||'-')}</span>
           <span class="trow-user">${escapeHtml(t.UserOut||'-')}</span>
-          <span class="trow-km">${dist ? dist.toLocaleString()+' กม.' : '-'}</span>
+          <span class="trow-km">${dist ? `<span class="num">${dist.toLocaleString()}</span><span class="unit">กม.</span>` : '<span class="num">-</span>'}</span>
           <button class="trow-del" title="ลบทริปนี้"><svg class="ic" viewBox="0 0 24 24">${ic('trash')}</svg></button>
         </div>`;
       }).join('')}
