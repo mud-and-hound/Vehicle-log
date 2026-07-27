@@ -184,7 +184,7 @@ async function apiGetBranches(){
   if(isDemo) return BRANCHES;
   const r = await fetch(CONFIG.APPS_SCRIPT_URL + '?action=branches');
   const j = await r.json();
-  return j.ok ? j.data.map(b=>({brand:b.Brand, shopId:String(b.ShopID), code:b.Code, name:b.Name})) : [];
+  return j.ok ? j.data.map(b=>({brand:String(b.Brand||''), shopId:String(b.ShopID??''), code:String(b.Code||''), name:String(b.Name||'')})) : [];
 }
 async function apiAddBranch(payload){
   if(isDemo){ BRANCHES.push(payload); return; }
@@ -216,7 +216,7 @@ function render(){
   if(curBrand!=='ALL') list = list.filter(b=>b.brand===curBrand);
   if(searchQ){
     const q = searchQ.toLowerCase();
-    list = list.filter(b => b.shopId.toLowerCase().includes(q) || b.code.toLowerCase().includes(q) || b.name.toLowerCase().includes(q));
+    list = list.filter(b => String(b.shopId).toLowerCase().includes(q) || String(b.code).toLowerCase().includes(q) || String(b.name).toLowerCase().includes(q));
   }
   list = list.slice(0, 300); // กันเรนเดอร์หนักเกินไปตอนค้นหากว้างๆ
 
