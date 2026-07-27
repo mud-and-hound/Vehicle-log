@@ -621,7 +621,7 @@ async function init(){
     const saveBtn = document.getElementById('saveBtn');
     const saveBtnOriginal = saveBtn.innerHTML;
     saveBtn.disabled = true;
-    saveBtn.innerHTML = '<span class="spin-sm"></span> กำลังบันทึกลง Google Sheet...';
+    saveBtn.innerHTML = '<span class="spin-sm"></span> กำลังบันทึก';
     try{
       const isEdit = !!editingId;
       if(editingId){ payload.ID = editingId; await apiUpdate(payload); }
