@@ -161,9 +161,9 @@ input::placeholder{color:var(--tx3)}
 <div class="controls">
   <div class="row-between">
     <div class="month-nav" style="flex:1">
-      <button id="prevMonth"><svg class="ic" id="icPrev"></svg></button>
+      <button id="prevMonth" title="ดูข้อมูลเดือนก่อนหน้า"><svg class="ic" id="icPrev"></svg></button>
       <span class="lbl" id="monthLabel">-</span>
-      <button id="nextMonth"><svg class="ic" id="icNext"></svg></button>
+      <button id="nextMonth" title="ดูข้อมูลเดือนถัดไป"><svg class="ic" id="icNext"></svg></button>
     </div>
     <div class="view-toggle">
       <button data-view="list" class="active"><svg class="ic"></svg>รายการ</button>
@@ -193,7 +193,7 @@ input::placeholder{color:var(--tx3)}
   <b>เชื่อมต่อ Google Sheet เรียบร้อย</b> — ข้อมูลทริปและรายชื่อสาขาซิงก์กับชีตจริงแบบเรียลไทม์ ทุกคนในทีมเห็นข้อมูลชุดเดียวกัน
 </div>
 
-<button class="fab" id="addBtn"><svg class="ic"></svg></button>
+<button class="fab" id="addBtn" title="เพิ่มการเดินทางใหม่"><svg class="ic"></svg></button>
 
 <div class="overlay" id="overlay">
   <div class="sheet">
@@ -237,7 +237,7 @@ input::placeholder{color:var(--tx3)}
       </div>
 
       <div class="grid2">
-        <div class="field"><label>เลขไมค์เริ่มต้น</label><input type="number" id="f_mStart" placeholder="0"></div>
+        <div class="field"><label>เลขไมค์เริ่มต้น</label><input type="number" id="f_mStart" placeholder="0"><div style="font-size:10.5px;color:var(--tx3);margin-top:4px" id="mStartHint"></div></div>
         <div class="field"><label>เลขไมค์สิ้นสุด</label><input type="number" id="f_mEnd" placeholder="0"></div>
       </div>
       <div class="dist-preview">ระยะทางที่ใช้ <span class="num mono" id="distVal">-</span></div>
@@ -439,8 +439,8 @@ function render(){
         <div class="route-line dest"><svg class="ic" viewBox="0 0 24 24">${ic('map-pin')}</svg><b>${escapeHtml(t.DestName||'-')}</b></div>
       </div>
       <div class="meta">
-        <span><b>${escapeHtml(t.UserOut||'-')}</b> · ${fmtDate(t.OutDate)} → ${fmtDate(t.InDate)}</span>
-        <span class="mono">${t.MileageStart??'-'} → ${t.MileageEnd??'-'}</span>
+        <span><b>${escapeHtml(t.UserOut||'-')}</b> · ${fmtDate(t.OutDate)} <svg class="ic" viewBox="0 0 24 24" style="width:10px;height:10px">${ic('arrow-small-right')}</svg> ${fmtDate(t.InDate)}</span>
+        <span class="mono">${t.MileageStart??'-'} <svg class="ic" viewBox="0 0 24 24" style="width:10px;height:10px">${ic('arrow-small-right')}</svg> ${t.MileageEnd??'-'}</span>
         ${dist?`<span class="dist">${dist.toLocaleString()} กม.</span>`:''}
       </div>
       <div class="card-actions">
@@ -455,11 +455,12 @@ function render(){
 }
 
 async function deleteTrip(id){
-  if(!confirm('ลบรายการนี้ใช่ไหม?')) return;
+  const t = trips.find(x=>x.ID===id);
+  if(!confirm('ลบทริปไปที่ "' + (t ? t.DestName : '') + '" ใช่ไหม? กู้คืนไม่ได้')) return;
   await apiDelete(id);
   trips = await apiGetTrips();
   render();
-  showToast('ลบรายการแล้ว');
+  showToast('ลบทริปไปที่ "' + (t ? t.DestName : '') + '" ออกจาก Google Sheet แล้ว');
 }
 
 function setFormBrand(b){
@@ -506,7 +507,14 @@ function closeSheet(){ document.getElementById('overlay').classList.remove('open
 function setPlate(p){
   document.querySelectorAll('.plate-opt').forEach(el=>el.classList.toggle('sel', el.dataset.plate===p));
   document.getElementById('platePick').dataset.value = p;
-  if(!editingId){ document.getElementById('f_mStart').value = suggestStartMileage(p); }
+  const hint = document.getElementById('mStartHint');
+  if(!editingId){
+    const suggested = suggestStartMileage(p);
+    document.getElementById('f_mStart').value = suggested;
+    hint.textContent = suggested!=='' ? `ดึงมาจากไมค์สิ้นสุดของทริปล่าสุดของรถคันนี้ (${PLATES[p]}) แก้ไขได้` : `ยังไม่มีประวัติของรถคันนี้ กรอกเลขไมค์เริ่มต้นเอง`;
+  } else {
+    hint.textContent = '';
+  }
   updateDistPreview();
 }
 
@@ -603,14 +611,16 @@ async function init(){
     const saveBtn = document.getElementById('saveBtn');
     saveBtn.disabled = true;
     try{
+      const isEdit = !!editingId;
       if(editingId){ payload.ID = editingId; await apiUpdate(payload); }
       else{ await apiAdd(payload); }
       trips = await apiGetTrips();
       curMonth = monthKey(payload.OutDate) || curMonth;
       render();
       closeSheet();
-      showToast('บันทึกเรียบร้อย');
-    }catch(err){ showToast('บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง'); }
+      const action = isEdit ? 'แก้ไขทริป' : 'เพิ่มทริปใหม่';
+      showToast(`${action}ไปที่ "${payload.DestName}" วันที่ ${fmtDate(payload.OutDate)} บันทึกลง Google Sheet แล้ว`);
+    }catch(err){ showToast('บันทึกไม่สำเร็จ เช็คการเชื่อมต่อ Google Sheet แล้วลองใหม่'); }
     saveBtn.disabled = false;
   });
 }
