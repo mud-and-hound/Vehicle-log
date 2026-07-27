@@ -168,6 +168,20 @@ input::placeholder{color:var(--tx3)}
 .btn-save:disabled{opacity:.85}
 .btn-save.is-success{background:var(--tx);color:var(--ink)}
 
+/* ---------- Skeleton loading ---------- */
+.sk-bar{height:10px;border-radius:5px;background:linear-gradient(90deg,var(--line) 25%,var(--ink) 37%,var(--line) 63%);background-size:400% 100%;animation:sk-shimmer 1.4s ease infinite}
+@keyframes sk-shimmer{0%{background-position:100% 50%}100%{background-position:0 50%}}
+.sk-tbl{background:var(--panel);border:1px solid var(--line);border-radius:var(--r2);overflow:hidden}
+.sk-row{display:grid;grid-template-columns:26px 1fr 48px 60px 74px 26px;gap:8px;align-items:center;padding:11px 12px;border-bottom:1px solid var(--line)}
+.sk-row:last-child{border-bottom:none}
+.sk-row .sk-bar:nth-child(2){width:70%}
+.sk-row .sk-bar:nth-child(3),.sk-row .sk-bar:nth-child(4),.sk-row .sk-bar:nth-child(5){width:60%;justify-self:center}
+.sk-row .sk-bar:nth-child(6){width:16px;height:16px;border-radius:4px;justify-self:center}
+@media (max-width:480px){ .sk-row{grid-template-columns:22px 1fr 44px 60px 24px} .sk-row .sk-bar:nth-child(3){display:none} }
+.sk-stat .v{height:17px;border-radius:5px}
+.sk-stat .l{height:9px;border-radius:4px;margin-top:5px;width:70%;margin-left:auto;margin-right:auto}
+.stat-row.stat-loading .v{color:transparent;background:linear-gradient(90deg,var(--line) 25%,var(--ink) 37%,var(--line) 63%);background-size:400% 100%;animation:sk-shimmer 1.4s ease infinite;border-radius:5px}
+
 .setup-note{margin:16px 18px 0;padding:12px 14px;background:var(--panel);border:1px dashed var(--line);border-radius:var(--r2);font-size:11.5px;color:var(--tx3);line-height:1.6}
 .setup-note code{font-family:var(--mono);background:var(--ink);padding:1px 5px;border-radius:4px;color:var(--amber)}
 </style>
@@ -178,7 +192,7 @@ input::placeholder{color:var(--tx3)}
   <div class="eyebrow"><svg class="ic"></svg>IT DEPARTMENT · FLEET LOG</div>
   <h1>บันทึกการใช้รถ IT Department</h1>
   <span class="demo-badge" id="modeBadge"><svg class="ic"></svg>โหมดตัวอย่าง — ยังไม่เชื่อม Google Sheet</span>
-  <div class="stat-row">
+  <div class="stat-row stat-loading" id="statRow">
     <div class="stat"><div class="v mono" id="odoTrips">0</div><div class="l">เที่ยวเดือนนี้</div></div>
     <div class="stat"><div class="v mono" id="odoA">0</div><div class="l">กม. รถ 7643</div></div>
     <div class="stat"><div class="v mono" id="odoB">0</div><div class="l">กม. รถ 8066</div></div>
@@ -214,7 +228,14 @@ input::placeholder{color:var(--tx3)}
   </div>
 </div>
 
-<div id="listBox" class="list"><div class="spin"></div></div>
+<div id="listBox" class="list">
+  <div class="sk-tbl">
+    <div class="sk-row"><span class="sk-bar"></span><span class="sk-bar"></span><span class="sk-bar"></span><span class="sk-bar"></span><span class="sk-bar"></span><span class="sk-bar"></span></div>
+    <div class="sk-row"><span class="sk-bar"></span><span class="sk-bar"></span><span class="sk-bar"></span><span class="sk-bar"></span><span class="sk-bar"></span><span class="sk-bar"></span></div>
+    <div class="sk-row"><span class="sk-bar"></span><span class="sk-bar"></span><span class="sk-bar"></span><span class="sk-bar"></span><span class="sk-bar"></span><span class="sk-bar"></span></div>
+    <div class="sk-row"><span class="sk-bar"></span><span class="sk-bar"></span><span class="sk-bar"></span><span class="sk-bar"></span><span class="sk-bar"></span><span class="sk-bar"></span></div>
+  </div>
+</div>
 
 <div class="setup-note" id="connNote" style="display:none">
   <b>เชื่อมต่อ Google Sheet เรียบร้อย</b> — ข้อมูลทริปและรายชื่อสาขาซิงก์กับชีตจริงแบบเรียลไทม์ ทุกคนในทีมเห็นข้อมูลชุดเดียวกัน
@@ -318,6 +339,14 @@ function seedDemo(){
 }
 
 function uid(){ return 't_' + Date.now() + '_' + Math.random().toString(36).slice(2,8); }
+function skeletonListHTML(n){
+  n = n || 4;
+  let rows = '';
+  for(let i=0;i<n;i++){
+    rows += '<div class="sk-row"><span class="sk-bar"></span><span class="sk-bar"></span><span class="sk-bar"></span><span class="sk-bar"></span><span class="sk-bar"></span><span class="sk-bar"></span></div>';
+  }
+  return '<div class="sk-tbl">' + rows + '</div>';
+}
 function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
 function fmtDate(iso){ if(!iso) return '-'; const d=new Date(iso+'T00:00:00'); return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear(); }
 function monthKey(iso){ return iso ? iso.slice(0,7) : ''; }
@@ -350,25 +379,29 @@ async function apiDelete(id){
 }
 
 /* ---------- Branch picker ---------- */
+function padShopId(id){
+  const s = String(id);
+  return /^\d+$/.test(s) ? s.padStart(4,'0') : s;
+}
 function populateDestList(brand){
   const dl = document.getElementById('destList');
   const list = BRANCHES.filter(b=>b.brand===brand);
-  dl.innerHTML = list.map(b=>`<option value="${escapeHtml(b.shopId)} - ${escapeHtml(b.code)} - ${escapeHtml(b.name)}">`).join('');
+  dl.innerHTML = list.map(b=>`<option value="${escapeHtml(padShopId(b.shopId))} - ${escapeHtml(b.code)} - ${escapeHtml(b.name)}">`).join('');
   document.getElementById('destCount').textContent = `${list.length.toLocaleString()} สาขาในแบรนด์ ${brand} · ค้นหาได้ทั้งเลขสาขา, ชื่อย่อ, หรือชื่อเต็ม`;
 }
 function findBranch(brand, raw){
   const s = String(raw).trim().toLowerCase();
   const inBrand = BRANCHES.filter(b=>b.brand===brand);
   // ตรงกับรูปแบบ "Shop ID - Code - Name" ที่เลือกจาก dropdown เป๊ะๆ
-  let hit = inBrand.find(b => `${b.shopId} - ${b.code} - ${b.name}`.toLowerCase() === s);
+  let hit = inBrand.find(b => `${padShopId(b.shopId)} - ${b.code} - ${b.name}`.toLowerCase() === s);
   if(hit) return hit;
-  // พิมพ์แค่เลขสาขา หรือแค่ชื่อย่อ หรือแค่ชื่อเต็มเฉยๆ ก็ยังจับคู่ได้
-  hit = inBrand.find(b => b.shopId.toLowerCase() === s || b.code.toLowerCase() === s || b.name.toLowerCase() === s);
+  // พิมพ์แค่เลขสาขา (ทั้งแบบเติมศูนย์หรือไม่เติมก็ได้) หรือแค่ชื่อย่อ หรือแค่ชื่อเต็มเฉยๆ ก็ยังจับคู่ได้
+  hit = inBrand.find(b => padShopId(b.shopId).toLowerCase() === s || String(b.shopId).toLowerCase() === s || b.code.toLowerCase() === s || b.name.toLowerCase() === s);
   return hit || null;
 }
 function destDisplayValue(brand, code, name){
   const b = BRANCHES.find(x=>x.brand===brand && x.code===code && x.name===name);
-  return b ? `${b.shopId} - ${b.code} - ${b.name}` : (name||'');
+  return b ? `${padShopId(b.shopId)} - ${b.code} - ${b.name}` : (name||'');
 }
 
 function purposeChipsRender(selected){
@@ -460,6 +493,7 @@ function render(){
   animateNum(document.getElementById('odoTrips'), monthTrips.length);
   animateNum(document.getElementById('odoA'), distA);
   animateNum(document.getElementById('odoB'), distB);
+  document.getElementById('statRow').classList.remove('stat-loading');
 
   const box = document.getElementById('listBox');
   if(viewTrips.length===0){
@@ -599,7 +633,7 @@ function paintAllStaticIcons(){
 
 async function init(){
   paintAllStaticIcons();
-  document.getElementById('listBox').innerHTML = '<div class="spin"></div>';
+  document.getElementById('listBox').innerHTML = skeletonListHTML();
   if(isDemo){ seedDemo(); }
   else{
     document.getElementById('modeBadge').style.display='none';
