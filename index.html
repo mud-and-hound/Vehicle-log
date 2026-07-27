@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>IT Department — เลือกหน้าที่ต้องการ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#f4efe6; --panel:#fffdf9; --line:#e6dcc9;
+  --tx:#3a2f22; --tx2:#7a6a55; --tx3:#a4927a;
+  --amber:#a5643a; --amber-ink:#ffffff;
+  --r1:16px; --r2:14px;
+  --sans:'Prompt',sans-serif; --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--ink);color:var(--tx);font-family:var(--sans);overflow-x:hidden;min-height:100vh}
+body{display:flex;flex-direction:column;align-items:center;padding:0 18px}
+.ic{width:1em;height:1em;fill:currentColor;display:inline-block;vertical-align:-0.14em;flex-shrink:0}
+.mono{font-family:var(--mono)}
+a{text-decoration:none;color:inherit}
+
+.wrap{width:100%;max-width:520px;padding-top:56px}
+.eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;color:var(--tx3);text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:6px}
+.eyebrow .ic{width:12px;height:12px;color:var(--amber)}
+h1{font-size:22px;font-weight:600;text-align:center;margin:8px 0 2px}
+.sub{font-size:13px;color:var(--tx3);text-align:center;margin:0 0 32px}
+
+.cards{display:flex;flex-direction:column;gap:14px}
+.card{display:flex;align-items:center;gap:16px;background:var(--panel);border:1px solid var(--line);border-radius:var(--r2);padding:20px;transition:border-color .15s, transform .1s}
+.card:active{transform:scale(.98)}
+.card:hover{border-color:var(--amber)}
+.card-icon{width:52px;height:52px;border-radius:14px;background:var(--ink);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--amber);flex-shrink:0}
+.card-icon .ic{width:24px;height:24px}
+.card-body{flex:1;min-width:0}
+.card-body h2{font-size:15.5px;font-weight:600;margin:0 0 4px;color:var(--tx)}
+.card-body p{font-size:12.5px;color:var(--tx3);margin:0;line-height:1.5}
+.card-arrow{color:var(--tx3);flex-shrink:0}
+.card-arrow .ic{width:16px;height:16px}
+
+.footer-note{margin-top:28px;font-size:11px;color:var(--tx3);text-align:center}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="eyebrow"><svg class="ic"></svg>IT DEPARTMENT</div>
+  <h1>ระบบบันทึกการใช้รถ</h1>
+  <p class="sub">เลือกหน้าที่ต้องการใช้งาน</p>
+
+  <div class="cards">
+    <a class="card" href="vehicle-log-v3.html">
+      <div class="card-icon"><svg class="ic" id="icRoute"></svg></div>
+      <div class="card-body">
+        <h2>บันทึกการใช้รถ &amp; Export ข้อมูล</h2>
+        <p>เพิ่ม/แก้ไข/ลบทริป ดูปฏิทิน กรองตามรถ และ export ข้อมูลเดินทาง (วันที่ ระยะทาง ปลายทาง) เป็น CSV</p>
+      </div>
+      <div class="card-arrow"><svg class="ic" id="icArrow1"></svg></div>
+    </a>
+
+    <a class="card" href="branches-manager.html">
+      <div class="card-icon"><svg class="ic" id="icShop"></svg></div>
+      <div class="card-body">
+        <h2>จัดการข้อมูลสาขา</h2>
+        <p>เพิ่ม / แก้ไข / ลบ รายชื่อสาขา GD, GHC, ABP ที่ใช้ในระบบบันทึกการเดินทาง</p>
+      </div>
+      <div class="card-arrow"><svg class="ic" id="icArrow2"></svg></div>
+    </a>
+  </div>
+
+  <p class="footer-note">ข้อมูลทั้งหมดซิงก์กับ Google Sheet ชุดเดียวกัน</p>
+</div>
+
+<script>
+const SVGICONS = {"route":"<path d=\"M5.005,24.006c-.548,0-1.097-.198-1.524-.596l-1.99-1.849c-1.976-1.975-1.976-5.147-.026-7.096,.945-.944,2.201-1.464,3.536-1.464s2.591,.52,3.535,1.464h0c.945,.944,1.465,2.2,1.465,3.536s-.52,2.591-1.465,3.535l-2.001,1.871c-.428,.4-.978,.6-1.528,.6Zm-.005-9.006c-.801,0-1.555,.312-2.122,.879-1.169,1.169-1.169,3.072,0,4.242l1.964,1.824c.092,.085,.234,.085,.326,0l1.977-1.847c.542-.543,.854-1.296,.854-2.098s-.312-1.555-.879-2.122h0c-.566-.566-1.32-.878-2.121-.878Zm14.005-3.994c-.548,0-1.097-.199-1.524-.596l-1.99-1.849c-1.976-1.975-1.976-5.147-.026-7.096,.944-.944,2.2-1.464,3.536-1.464s2.59,.52,3.535,1.464h0c1.95,1.95,1.95,5.122,0,7.071l-2.001,1.871c-.428,.4-.979,.6-1.529,.6Zm-.005-9.006c-.802,0-1.555,.312-2.122,.878-1.169,1.17-1.169,3.073,0,4.243l1.963,1.824c.093,.086,.236,.084,.327,0l1.977-1.847c1.145-1.146,1.145-3.049-.024-4.219h0c-.567-.567-1.32-.879-2.121-.879Zm5,18c0-2.206-1.794-4-4-4h-5c-1.103,0-2-.897-2-2,0-.847,.536-1.604,1.333-1.886,.521-.184,.794-.755,.61-1.276-.184-.521-.754-.795-1.276-.61-1.595,.563-2.667,2.08-2.667,3.772,0,2.206,1.794,4,4,4h5c1.103,0,2,.897,2,2s-.897,2-2,2H11c-.552,0-1,.448-1,1s.448,1,1,1h9c2.206,0,4-1.794,4-4Z\"/>","shop":"<path d=\"M24,10a.988.988,0,0,0-.024-.217l-1.3-5.868A4.968,4.968,0,0,0,17.792,0H6.208a4.968,4.968,0,0,0-4.88,3.915L.024,9.783A.988.988,0,0,0,0,10v1a3.984,3.984,0,0,0,1,2.643V19a5.006,5.006,0,0,0,5,5H18a5.006,5.006,0,0,0,5-5V13.643A3.984,3.984,0,0,0,24,11ZM2,10.109l1.28-5.76A2.982,2.982,0,0,1,6.208,2H7V5A1,1,0,0,0,9,5V2h6V5a1,1,0,0,0,2,0V2h.792A2.982,2.982,0,0,1,20.72,4.349L22,10.109V11a2,2,0,0,1-2,2H19a2,2,0,0,1-2-2,1,1,0,0,0-2,0,2,2,0,0,1-2,2H11a2,2,0,0,1-2-2,1,1,0,0,0-2,0,2,2,0,0,1-2,2H4a2,2,0,0,1-2-2ZM18,22H6a3,3,0,0,1-3-3V14.873A3.978,3.978,0,0,0,4,15H5a3.99,3.99,0,0,0,3-1.357A3.99,3.99,0,0,0,11,15h2a3.99,3.99,0,0,0,3-1.357A3.99,3.99,0,0,0,19,15h1a3.978,3.978,0,0,0,1-.127V19A3,3,0,0,1,18,22Z\"/>","arrow-small-right":"<path d=\"M18,12h0a2,2,0,0,0-.59-1.4l-4.29-4.3a1,1,0,0,0-1.41,0,1,1,0,0,0,0,1.42L15,11H5a1,1,0,0,0,0,2H15l-3.29,3.29a1,1,0,0,0,1.41,1.42l4.29-4.3A2,2,0,0,0,18,12Z\"/>"};
+function paint(id, name){
+  const el = document.getElementById(id);
+  el.innerHTML = (SVGICONS[name]||'').toString();
+  el.setAttribute('viewBox','0 0 24 24');
+}
+paint('icRoute','route');
+paint('icShop','shop');
+paint('icArrow1','arrow-small-right');
+paint('icArrow2','arrow-small-right');
+</script>
+</body>
+</html>
