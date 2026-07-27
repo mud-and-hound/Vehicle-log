@@ -605,7 +605,6 @@ function render(){
           <span class="trow-brand">${escapeHtml(t.Brand||'-')}</span>
           <span class="trow-user">${escapeHtml(t.UserOut||'-')}</span>
           <span class="trow-km">${dist ? `<span class="num">${dist.toLocaleString()}</span><span class="unit">กม.</span>` : '<span class="num">-</span>'}</span>
-          <button class="trow-del" title="ลบทริปนี้"><svg class="ic" viewBox="0 0 24 24">${ic('trash')}</svg></button>
         </div>`;
       }).join('')}
     </div>`;
