@@ -38,7 +38,7 @@ input::placeholder{color:var(--tx3)}
 .back-link .ic{width:12px;height:12px;transform:rotate(180deg)}
 .demo-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--amber);background:rgba(165,100,58,.08);border:1px solid rgba(165,100,58,.3);padding:3px 9px;border-radius:var(--r3);margin-top:8px}
 
-.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-top:14px}
+.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:6px;margin-top:14px}
 .stat{background:var(--ink);border:1px solid var(--line);border-radius:var(--r2);padding:9px 4px;text-align:center}
 .stat .v{font-family:var(--mono);font-size:16px;font-weight:700}
 .stat .l{font-size:9px;color:var(--tx3);margin-top:2px}
@@ -113,6 +113,7 @@ input::placeholder{color:var(--tx3)}
     <div class="stat"><div class="v mono" id="statGD">0</div><div class="l">GD</div></div>
     <div class="stat"><div class="v mono" id="statGHC">0</div><div class="l">GHC</div></div>
     <div class="stat"><div class="v mono" id="statABP">0</div><div class="l">ABP</div></div>
+    <div class="stat"><div class="v mono" id="statFF">0</div><div class="l">FF</div></div>
   </div>
 </div>
 
@@ -126,6 +127,7 @@ input::placeholder{color:var(--tx3)}
     <button data-brand="GD">GD</button>
     <button data-brand="GHC">GHC</button>
     <button data-brand="ABP">ABP</button>
+    <button data-brand="FF" title="Funky Fries (ฟังกี้ ฟรายส์)">FF</button>
   </div>
 </div>
 
@@ -146,6 +148,7 @@ input::placeholder{color:var(--tx3)}
           <button type="button" data-brand="GD">GD</button>
           <button type="button" data-brand="GHC">GHC</button>
           <button type="button" data-brand="ABP">ABP</button>
+          <button type="button" data-brand="FF" title="Funky Fries (ฟังกี้ ฟรายส์)">FF</button>
         </div>
       </div>
       <div class="grid2">
@@ -215,6 +218,7 @@ function render(){
   document.getElementById('statGD').textContent = BRANCHES.filter(b=>b.brand==='GD').length.toLocaleString();
   document.getElementById('statGHC').textContent = BRANCHES.filter(b=>b.brand==='GHC').length.toLocaleString();
   document.getElementById('statABP').textContent = BRANCHES.filter(b=>b.brand==='ABP').length.toLocaleString();
+  document.getElementById('statFF').textContent = BRANCHES.filter(b=>b.brand==='FF').length.toLocaleString();
 
   let list = BRANCHES;
   if(curBrand!=='ALL') list = list.filter(b=>b.brand===curBrand);
