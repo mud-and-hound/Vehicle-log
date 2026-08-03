@@ -95,6 +95,14 @@ input::placeholder{color:var(--tx3)}
 .spin-sm{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:sp .6s linear infinite;vertical-align:-2px;margin-right:2px}
 @keyframes sp{to{transform:rotate(360deg)}}
 
+/* ---------- Skeleton loading (ให้ตรงกับหน้าบันทึกการใช้รถ) ---------- */
+.sk-bar{height:10px;border-radius:5px;background:linear-gradient(90deg,var(--line) 25%,var(--ink) 37%,var(--line) 63%);background-size:400% 100%;animation:sk-shimmer 1.4s ease infinite}
+@keyframes sk-shimmer{0%{background-position:100% 50%}100%{background-position:0 50%}}
+.sk-tbl{background:var(--panel);border:1px solid var(--line);border-radius:var(--r2);overflow:hidden}
+.sk-row{display:grid;grid-template-columns:34px 1fr 42px 60px;gap:8px;align-items:center;padding:11px 12px;border-bottom:1px solid var(--line)}
+.sk-row:last-child{border-bottom:none}
+.stat-row.stat-loading .v{color:transparent;background:linear-gradient(90deg,var(--line) 25%,var(--ink) 37%,var(--line) 63%);background-size:400% 100%;animation:sk-shimmer 1.4s ease infinite;border-radius:5px}
+
 .toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--line);color:var(--tx);padding:10px 20px;border-radius:var(--r3);font-size:13px;z-index:99;opacity:0;pointer-events:none;transition:opacity .25s}
 .toast.show{opacity:1}
 
@@ -107,8 +115,8 @@ input::placeholder{color:var(--tx3)}
   <div class="eyebrow"><svg class="ic"></svg>IT DEPARTMENT · BRANCH MASTER DATA</div>
   <h1>จัดการข้อมูลสาขา</h1>
   <a href="index.html" class="back-link"><svg class="ic"></svg>กลับหน้าหลัก</a>
-  <span class="demo-badge" id="modeBadge" style="display:none">โหมดตัวอย่าง — ยังไม่เชื่อม Google Sheet</span>
-  <div class="stat-row">
+  <span class="demo-badge" id="modeBadge" style="display:none"><svg class="ic"></svg>โหมดตัวอย่าง — ยังไม่เชื่อม Google Sheet</span>
+  <div class="stat-row stat-loading" id="statRow">
     <div class="stat"><div class="v mono" id="statAll">0</div><div class="l">ทั้งหมด</div></div>
     <div class="stat"><div class="v mono" id="statGD">0</div><div class="l">GD</div></div>
     <div class="stat"><div class="v mono" id="statGHC">0</div><div class="l">GHC</div></div>
@@ -306,28 +314,41 @@ async function deleteBranch(brand, shopId, btnEl){
 }
 
 function paintAllStaticIcons(){
+  if(!SVGICONS.info){ SVGICONS.info = '<path d="M11.997,1C4.947,1.044,1.026,5.202,1.026,11.991c0,6.966,3.823,10.967,10.977,11.009,7.147-.042,10.839-3.74,10.971-11.009-.122-7.042-4.018-10.946-10.977-10.991Zm.006,21c-6.588-.039-9.852-3.31-9.977-9.009C2.151,6.386,5.415,3.083,12.003,3c6.588.083,9.852,3.386,9.977,8.991-.125,5.699-3.389,8.97-9.977,9.009Zm-1.501-14.5c0-.828.673-1.5,1.5-1.5s1.5.672,1.5,1.5-.673,1.5-1.5,1.5-1.5-.672-1.5-1.5Zm2.5,4v7.5a1,1,0,0,1-2,0V10.5a1,1,0,0,1,2,0Z"/>'; }
   paintIcon(document.querySelector('.eyebrow .ic'), 'shop');
   paintIcon(document.querySelector('.back-link .ic'), 'route');
+  paintIcon(document.querySelector('#modeBadge .ic'), 'info');
   paintIcon(document.querySelector('.search-box .ic'), 'search');
   paintIcon(document.getElementById('addBtn').querySelector('.ic'), 'plus');
   paintIcon(document.querySelector('.sheet-title .ic'), 'shop');
   paintIcon(document.querySelector('#cancelBtn .ic'), 'close');
   paintIcon(document.querySelector('#saveBtn .ic'), 'check');
 }
+function skeletonListHTML(n){
+  n = n || 5;
+  let rows = '';
+  for(let i=0;i<n;i++){
+    rows += '<div class="sk-row"><span class="sk-bar"></span><span class="sk-bar"></span><span class="sk-bar"></span><span class="sk-bar"></span></div>';
+  }
+  return '<div class="sk-tbl">' + rows + '</div>';
+}
 
 async function init(){
   paintAllStaticIcons();
-  document.getElementById('listBox').innerHTML = '<div class="empty">กำลังโหลด...</div>';
+  document.getElementById('listBox').innerHTML = skeletonListHTML();
   if(isDemo){
     document.getElementById('modeBadge').style.display = 'inline-flex';
+    document.getElementById('statRow').classList.remove('stat-loading');
   } else {
     try{
       BRANCHES = await apiGetBranches();
+      document.getElementById('statRow').classList.remove('stat-loading');
       const note = document.getElementById('connNote');
       note.style.display = 'block';
       note.innerHTML = `<b>เชื่อมต่อ Google Sheet เรียบร้อย</b> — ข้อมูลสาขา (${BRANCHES.length.toLocaleString()} รายการ) ซิงก์กับชีตจริงแบบเรียลไทม์`;
     }catch(e){
       showToast('เชื่อมต่อ Google Sheet ไม่ได้ตอนนี้ เช็คอินเทอร์เน็ตแล้วรีเฟรชอีกครั้ง');
+      document.getElementById('statRow').classList.remove('stat-loading');
     }
   }
   render();
