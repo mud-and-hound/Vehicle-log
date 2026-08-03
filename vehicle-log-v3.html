@@ -814,19 +814,19 @@ async function init(){
   if(isDemo){ seedDemo(); }
   else{
     document.getElementById('modeBadge').style.display='none';
-    try{
-      trips = await apiGetTrips();
-    }catch(e){
+    const [tripsResult, branchesResult] = await Promise.allSettled([
+      apiGetTrips(),
+      fetch(CONFIG.APPS_SCRIPT_URL + '?action=branches').then(r=>r.json())
+    ]);
+    if(tripsResult.status === 'fulfilled'){
+      trips = tripsResult.value;
+    }else{
       trips = [];
       showToast('เชื่อมต่อ Google Sheet ไม่ได้ตอนนี้ เช็คอินเทอร์เน็ตแล้วรีเฟรชอีกครั้ง');
     }
-    try{
-      const r = await fetch(CONFIG.APPS_SCRIPT_URL + '?action=branches');
-      const j = await r.json();
-      if(j.ok && j.data && j.data.length){
-        BRANCHES = j.data.map(b=>({brand:b.Brand, shopId:String(b.ShopID), code:b.Code, name:b.Name}));
-      }
-    }catch(e){ /* ใช้รายชื่อสาขาสำรองที่ฝังไว้ในไฟล์แทน */ }
+    if(branchesResult.status === 'fulfilled' && branchesResult.value.ok && branchesResult.value.data && branchesResult.value.data.length){
+      BRANCHES = branchesResult.value.data.map(b=>({brand:b.Brand, shopId:String(b.ShopID), code:b.Code, name:b.Name}));
+    }
     const note = document.getElementById('connNote');
     note.style.display = 'block';
     note.innerHTML = '<b>เชื่อมต่อ Google Sheet เรียบร้อย</b> — ข้อมูลทริปและรายชื่อสาขา (' + BRANCHES.length.toLocaleString() + ' สาขา) ซิงก์กับชีตจริงแบบเรียลไทม์ ทุกคนในทีมเห็นข้อมูลชุดเดียวกัน';
