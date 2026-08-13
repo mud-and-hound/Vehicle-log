@@ -196,6 +196,7 @@ input::placeholder{color:var(--tx3)}
 .setup-note{margin:16px 18px 0;padding:12px 14px;background:var(--panel);border:1px dashed var(--line);border-radius:var(--r2);font-size:11.5px;color:var(--tx3);line-height:1.6}
 .setup-note code{font-family:var(--mono);background:var(--ink);padding:1px 5px;border-radius:4px;color:var(--amber)}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -203,7 +204,7 @@ input::placeholder{color:var(--tx3)}
   <div class="eyebrow"><svg class="ic"></svg>IT DEPARTMENT · FLEET LOG</div>
   <h1>บันทึกการใช้รถ IT Department</h1>
   <a href="index.html" class="back-link"><svg class="ic"></svg>กลับหน้าหลัก</a>
-  <span class="demo-badge" id="modeBadge"><svg class="ic"></svg>โหมดตัวอย่าง — ยังไม่เชื่อม Google Sheet</span>
+  <span class="demo-badge" id="modeBadge"><svg class="ic"></svg>โหมดตัวอย่าง — ยังไม่เชื่อมฐานข้อมูล</span>
   <div class="stat-row stat-loading" id="statRow">
     <div class="stat"><div class="v mono" id="odoTrips">0</div><div class="l">เที่ยวเดือนนี้</div></div>
     <div class="stat"><div class="v mono" id="odoA">0</div><div class="l">กม. รถ 7643</div></div>
@@ -226,7 +227,7 @@ input::placeholder{color:var(--tx3)}
   <div class="row-between">
     <div class="plate-row" id="plateSeg" style="flex:1">
       <button class="pchip active" data-plate="ALL"><svg class="ic"></svg>ทุกคัน</button>
-      <button class="pchip" data-plate="A"><svg class="ic"></svg>3ฒษ-7643</button>
+      <button class="pchip" data-plate="A"><svg class="ic"></svg>3ฒ-7643</button>
       <button class="pchip" data-plate="B"><svg class="ic"></svg>3ฒภ-8066</button>
     </div>
     <button id="exportBtn" title="Export ข้อมูล" style="flex-shrink:0;width:38px;height:38px;border-radius:9px;background:var(--panel);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--tx2)"><svg class="ic" style="width:16px;height:16px"></svg></button>
@@ -253,7 +254,7 @@ input::placeholder{color:var(--tx3)}
 </div>
 
 <div class="setup-note" id="connNote" style="display:none">
-  <b>เชื่อมต่อ Google Sheet เรียบร้อย</b> — ข้อมูลทริปและรายชื่อสาขาซิงก์กับชีตจริงแบบเรียลไทม์ ทุกคนในทีมเห็นข้อมูลชุดเดียวกัน
+  <b>เชื่อมต่อฐานข้อมูลเรียบร้อย</b> — ข้อมูลทริปและรายชื่อสาขาซิงก์แบบเรียลไทม์ ทุกคนในทีมเห็นข้อมูลชุดเดียวกัน
 </div>
 
 <button class="fab" id="addBtn" title="เพิ่มการเดินทางใหม่"><svg class="ic"></svg></button>
@@ -279,7 +280,7 @@ input::placeholder{color:var(--tx3)}
       <div class="field">
         <label>ทะเบียนรถ</label>
         <div class="plate-pick" id="platePick">
-          <div class="plate-opt" data-plate="A"><svg class="ic"></svg>3ฒษ-7643</div>
+          <div class="plate-opt" data-plate="A"><svg class="ic"></svg>3ฒ-7643</div>
           <div class="plate-opt" data-plate="B"><svg class="ic"></svg>3ฒภ-8066</div>
           <div class="plate-opt" data-plate="OTHER"><svg class="ic"></svg>อื่นๆ</div>
         </div>
@@ -354,10 +355,10 @@ input::placeholder{color:var(--tx3)}
       </div>
       <input type="hidden" id="exp_to">
     </div>
-    <div style="font-size:11px;color:var(--tx3);margin:-4px 0 4px">ไฟล์ .csv ครบทุกคอลัมน์: ลำดับ, วันที่ออก-กลับ, ปลายทาง, ทะเบียนรถ, ผู้ใช้, ระยะทาง, ไมค์เริ่ม-สิ้นสุด, รายละเอียด, หมายเหตุ</div>
+    <div style="font-size:11px;color:var(--tx3);margin:-4px 0 4px">ไฟล์ .xlsx เปิดใน Excel ได้ทันที แยกคอลัมน์ถูกต้องเสมอ: ลำดับ, วันที่ออก-กลับ, ปลายทาง, ทะเบียนรถ, ผู้ใช้, ระยะทาง, ไมค์เริ่ม-สิ้นสุด, รายละเอียด, หมายเหตุ</div>
     <div class="sheet-actions">
       <button type="button" class="btn-cancel" id="exportCancelBtn"><svg class="ic"></svg>ยกเลิก</button>
-      <button type="button" class="btn-save" id="exportConfirmBtn"><svg class="ic"></svg>ดาวน์โหลด CSV</button>
+      <button type="button" class="btn-save" id="exportConfirmBtn"><svg class="ic"></svg>ดาวน์โหลด Excel (.xlsx)</button>
     </div>
   </div>
 </div>
@@ -376,7 +377,7 @@ function paintIcon(el, name){ el.innerHTML = ic(name); el.setAttribute('viewBox'
 /* ====== ตั้งค่าการเชื่อมต่อ ====== */
 const CONFIG = { API_URL: 'https://vehiclelog.mobile1234.site' };
 
-const PLATES = { A: '3ฒษ-7643', B: '3ฒภ-8066' };
+const PLATES = { A: '3ฒ-7643', B: '3ฒภ-8066' };
 const PURPOSES = ['เปิดร้าน','ปิดร้าน','ซ่อมบำรุง','เก็บอุปกรณ์','ติดตั้ง/เปลี่ยนอุปกรณ์ POS','ตรวจเช็คระบบ','ประชุม/อบรม','อื่นๆ'];
 const THAI_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
 const THAI_MONTHS_SHORT = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
@@ -682,9 +683,9 @@ async function deleteTrip(id, btnEl){
     await apiDelete(id);
     trips = await apiGetTrips();
     render();
-    showToast('ลบทริปไปที่ "' + (t ? t.DestName : '') + '" ออกจาก Google Sheet แล้ว');
+    showToast('ลบทริปไปที่ "' + (t ? t.DestName : '') + '" ออกจากระบบแล้ว');
   }catch(err){
-    showToast('ลบไม่สำเร็จ เช็คการเชื่อมต่อ Google Sheet แล้วลองใหม่');
+    showToast('ลบไม่สำเร็จ เช็คการเชื่อมต่อแล้วลองใหม่');
     if(btnEl){ btnEl.disabled = false; btnEl.innerHTML = original; }
   }
 }
@@ -757,13 +758,13 @@ function runExport(){
 
   if(rows.length===0){ showToast('ไม่มีข้อมูลทริปในช่วงวันที่นี้'); return; }
 
-  const T = '\t';
-  let csv = ['ลำดับ','วันที่ออกเดินทาง','วันที่กลับ','ปลายทาง','ทะเบียนรถ','ผู้ใช้/ผู้คืน','ระยะทาง(กม.)','ไมค์เริ่ม','ไมค์สิ้นสุด','รายละเอียด','หมายเหตุ'].join(T) + '\r\n';
+  const header = ['ลำดับ','วันที่ออกเดินทาง','วันที่กลับ','ปลายทาง','ทะเบียนรถ','ผู้ใช้/ผู้คืน','ระยะทาง(กม.)','ไมค์เริ่ม','ไมค์สิ้นสุด','รายละเอียด','หมายเหตุ'];
+  const aoa = [header];
   rows.forEach((t,i)=>{
     const dist = (t.MileageEnd!=null && t.MileageEnd!=='' && t.MileageStart!=null && t.MileageStart!=='' && Number(t.MileageEnd)>=Number(t.MileageStart)) ? (Number(t.MileageEnd)-Number(t.MileageStart)) : '';
     const dest = [t.DestCode, t.DestName].filter(Boolean).join(' - ');
     const userDisplay = (t.UserIn && t.UserIn!==t.UserOut) ? `${t.UserOut||''}/${t.UserIn}` : (t.UserOut||'');
-    csv += [
+    aoa.push([
       i+1,
       fmtDateShort(t.OutDate),
       fmtDateShort(t.InDate),
@@ -775,16 +776,17 @@ function runExport(){
       t.MileageEnd ?? '',
       t.PurposeType || '',
       t.PurposeDetail || '',
-    ].join(T) + '\r\n';
+    ]);
   });
 
-  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `vehicle-log_${from}_to_${to}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols'] = [
+    {wch:6}, {wch:12}, {wch:12}, {wch:32}, {wch:12}, {wch:16}, {wch:12}, {wch:10}, {wch:10}, {wch:22}, {wch:26}
+  ];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'บันทึกการใช้รถ');
+  XLSX.writeFile(wb, `vehicle-log_${from}_to_${to}.xlsx`);
+
   document.getElementById('exportOverlay').classList.remove('open');
   showToast(`ดาวน์โหลดข้อมูล ${rows.length} ทริป (${from} ถึง ${to}) แล้ว`);
 }
@@ -856,14 +858,14 @@ async function init(){
       trips = tripsResult.value;
     }else{
       trips = [];
-      showToast('เชื่อมต่อ Google Sheet ไม่ได้ตอนนี้ เช็คอินเทอร์เน็ตแล้วรีเฟรชอีกครั้ง');
+      showToast('เชื่อมต่อฐานข้อมูลไม่ได้ตอนนี้ เช็คอินเทอร์เน็ตแล้วรีเฟรชอีกครั้ง');
     }
     if(branchesResult.status === 'fulfilled' && branchesResult.value.ok && branchesResult.value.data && branchesResult.value.data.length){
       BRANCHES = branchesResult.value.data.map(b=>({brand:b.Brand, shopId:String(b.ShopID), code:b.Code, name:b.Name}));
     }
     const note = document.getElementById('connNote');
     note.style.display = 'block';
-    note.innerHTML = '<b>เชื่อมต่อ Google Sheet เรียบร้อย</b> — ข้อมูลทริปและรายชื่อสาขา (' + BRANCHES.length.toLocaleString() + ' สาขา) ซิงก์กับชีตจริงแบบเรียลไทม์ ทุกคนในทีมเห็นข้อมูลชุดเดียวกัน';
+    note.innerHTML = '<b>เชื่อมต่อฐานข้อมูลเรียบร้อย</b> — ข้อมูลทริปและรายชื่อสาขา (' + BRANCHES.length.toLocaleString() + ' สาขา) ซิงก์แบบเรียลไทม์ ทุกคนในทีมเห็นข้อมูลชุดเดียวกัน';
   }
   render();
 
@@ -927,7 +929,7 @@ async function init(){
     const saveBtn = document.getElementById('saveBtn');
     const saveBtnOriginal = saveBtn.innerHTML;
     saveBtn.disabled = true;
-    saveBtn.innerHTML = '<span class="spin-sm"></span> กำลังบันทึกลง Google Sheet...';
+    saveBtn.innerHTML = '<span class="spin-sm"></span> กำลังบันทึก...';
     try{
       const isEdit = !!editingId;
       if(editingId){ payload.ID = editingId; await apiUpdate(payload); }
@@ -942,9 +944,9 @@ async function init(){
 
       closeSheet();
       const action = isEdit ? 'แก้ไขทริป' : 'เพิ่มทริปใหม่';
-      showToast(`${action}ไปที่ "${payload.DestName}" วันที่ ${fmtDate(payload.OutDate)} บันทึกลง Google Sheet แล้ว`);
+      showToast(`${action}ไปที่ "${payload.DestName}" วันที่ ${fmtDate(payload.OutDate)} บันทึกเรียบร้อยแล้ว`);
     }catch(err){
-      showToast('บันทึกไม่สำเร็จ เช็คการเชื่อมต่อ Google Sheet แล้วลองใหม่');
+      showToast('บันทึกไม่สำเร็จ เช็คการเชื่อมต่อแล้วลองใหม่');
     }
     saveBtn.classList.remove('is-success');
     saveBtn.innerHTML = saveBtnOriginal;
