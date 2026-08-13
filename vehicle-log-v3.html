@@ -226,7 +226,7 @@ input::placeholder{color:var(--tx3)}
   <div class="row-between">
     <div class="plate-row" id="plateSeg" style="flex:1">
       <button class="pchip active" data-plate="ALL"><svg class="ic"></svg>ทุกคัน</button>
-      <button class="pchip" data-plate="A"><svg class="ic"></svg>3ฒ-7643</button>
+      <button class="pchip" data-plate="A"><svg class="ic"></svg>3ฒษ-7643</button>
       <button class="pchip" data-plate="B"><svg class="ic"></svg>3ฒภ-8066</button>
     </div>
     <button id="exportBtn" title="Export ข้อมูล" style="flex-shrink:0;width:38px;height:38px;border-radius:9px;background:var(--panel);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--tx2)"><svg class="ic" style="width:16px;height:16px"></svg></button>
@@ -279,9 +279,11 @@ input::placeholder{color:var(--tx3)}
       <div class="field">
         <label>ทะเบียนรถ</label>
         <div class="plate-pick" id="platePick">
-          <div class="plate-opt" data-plate="A"><svg class="ic"></svg>3ฒ-7643</div>
+          <div class="plate-opt" data-plate="A"><svg class="ic"></svg>3ฒษ-7643</div>
           <div class="plate-opt" data-plate="B"><svg class="ic"></svg>3ฒภ-8066</div>
+          <div class="plate-opt" data-plate="OTHER"><svg class="ic"></svg>อื่นๆ</div>
         </div>
+        <input type="text" id="f_plateCustom" placeholder="กรอกทะเบียนรถ เช่น 9กร-3643" style="display:none;margin-top:8px">
       </div>
 
       <div class="field">
@@ -352,7 +354,7 @@ input::placeholder{color:var(--tx3)}
       </div>
       <input type="hidden" id="exp_to">
     </div>
-    <div style="font-size:11px;color:var(--tx3);margin:-4px 0 4px">ไฟล์ที่ได้จะมีแค่: วันที่ออก-กลับ, ปลายทาง, ระยะทาง(กม.)</div>
+    <div style="font-size:11px;color:var(--tx3);margin:-4px 0 4px">ไฟล์ .csv ครบทุกคอลัมน์: ลำดับ, วันที่ออก-กลับ, ปลายทาง, ทะเบียนรถ, ผู้ใช้, ระยะทาง, ไมค์เริ่ม-สิ้นสุด, รายละเอียด, หมายเหตุ</div>
     <div class="sheet-actions">
       <button type="button" class="btn-cancel" id="exportCancelBtn"><svg class="ic"></svg>ยกเลิก</button>
       <button type="button" class="btn-save" id="exportConfirmBtn"><svg class="ic"></svg>ดาวน์โหลด CSV</button>
@@ -372,9 +374,9 @@ function ic(name){
 function paintIcon(el, name){ el.innerHTML = ic(name); el.setAttribute('viewBox','0 0 24 24'); }
 
 /* ====== ตั้งค่าการเชื่อมต่อ ====== */
-const CONFIG = { APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzWuClbf8hyqnxLdYZKWL-gFRSKucuKal-Lb1sBN4sxdiT26KSAXUk_mp9K-ul_KcI/exec' };
+const CONFIG = { API_URL: 'https://vehiclelog.mobile1234.site' };
 
-const PLATES = { A: '3ฒ-7643', B: '3ฒภ-8066' };
+const PLATES = { A: '3ฒษ-7643', B: '3ฒภ-8066' };
 const PURPOSES = ['เปิดร้าน','ปิดร้าน','ซ่อมบำรุง','เก็บอุปกรณ์','ติดตั้ง/เปลี่ยนอุปกรณ์ POS','ตรวจเช็คระบบ','ประชุม/อบรม','อื่นๆ'];
 const THAI_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
 const THAI_MONTHS_SHORT = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
@@ -449,7 +451,7 @@ let viewMode = 'list';
 let selDate = null;
 let editingId = null;
 let formBrand = 'GD';
-const isDemo = !CONFIG.APPS_SCRIPT_URL;
+const isDemo = !CONFIG.API_URL;
 
 function seedDemo(){
   const today = new Date().toISOString().slice(0,10);
@@ -476,6 +478,8 @@ function skeletonListHTML(n){
 }
 function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
 function fmtDate(iso){ if(!iso) return '-'; const d=new Date(iso+'T00:00:00'); return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear(); }
+function fmtDateShort(iso){ if(!iso) return ''; const d=new Date(iso+'T00:00:00'); const p=n=>String(n).padStart(2,'0'); return p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+String(d.getFullYear()).slice(-2); }
+function plateDisplay(p){ if(!p) return ''; return PLATES[p] || p; } // รองรับทะเบียนที่พิมพ์เอง (ไม่ใช่ A/B)
 function monthKey(iso){ return iso ? iso.slice(0,7) : ''; }
 function monthLabel(mk){ if(!mk) return ''; const [y,m]=mk.split('-').map(Number); return THAI_MONTHS[m-1]+' '+(y+543); }
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -488,21 +492,24 @@ function animateNum(el, to){
 /* ---------- API ---------- */
 async function apiGetTrips(){
   if(isDemo) return trips;
-  const r = await fetch(CONFIG.APPS_SCRIPT_URL + '?action=trips');
+  const r = await fetch(CONFIG.API_URL + '/trips');
   const j = await r.json();
   return j.ok ? j.data : [];
 }
 async function apiAdd(payload){
   if(isDemo){ payload.ID = uid(); trips.push(payload); return; }
-  await fetch(CONFIG.APPS_SCRIPT_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'add', payload}) });
+  const r = await fetch(CONFIG.API_URL + '/trips', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+  if(!r.ok) throw new Error('add failed');
 }
 async function apiUpdate(payload){
   if(isDemo){ const i=trips.findIndex(t=>t.ID===payload.ID); if(i>-1) trips[i]={...trips[i],...payload}; return; }
-  await fetch(CONFIG.APPS_SCRIPT_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'update', payload}) });
+  const r = await fetch(CONFIG.API_URL + '/trips/' + payload.ID, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+  if(!r.ok) throw new Error('update failed');
 }
 async function apiDelete(id){
   if(isDemo){ trips = trips.filter(t=>t.ID!==id); return; }
-  await fetch(CONFIG.APPS_SCRIPT_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify({action:'delete', payload:{ID:id}}) });
+  const r = await fetch(CONFIG.API_URL + '/trips/' + id, { method:'DELETE' });
+  if(!r.ok) throw new Error('delete failed');
 }
 
 /* ---------- Branch picker ---------- */
@@ -717,7 +724,12 @@ function openEdit(id){
   document.getElementById('f_mStart').value = t.MileageStart ?? '';
   document.getElementById('f_mEnd').value = t.MileageEnd ?? '';
   purposeChipsRender(t.PurposeType||'');
-  setPlate(t.Plate||'A');
+  if(t.Plate === 'A' || t.Plate === 'B'){
+    setPlate(t.Plate || 'A');
+  } else {
+    setPlate('OTHER');
+    document.getElementById('f_plateCustom').value = t.Plate || '';
+  }
   updateDistPreview();
   document.getElementById('overlay').classList.add('open');
 }
@@ -745,12 +757,25 @@ function runExport(){
 
   if(rows.length===0){ showToast('ไม่มีข้อมูลทริปในช่วงวันที่นี้'); return; }
 
-  let csv = 'วันที่ออกเดินทาง,วันที่กลับ,ปลายทาง,ระยะทาง(กม.)\n';
-  rows.forEach(t=>{
+  const T = '\t';
+  let csv = ['ลำดับ','วันที่ออกเดินทาง','วันที่กลับ','ปลายทาง','ทะเบียนรถ','ผู้ใช้/ผู้คืน','ระยะทาง(กม.)','ไมค์เริ่ม','ไมค์สิ้นสุด','รายละเอียด','หมายเหตุ'].join(T) + '\r\n';
+  rows.forEach((t,i)=>{
     const dist = (t.MileageEnd!=null && t.MileageEnd!=='' && t.MileageStart!=null && t.MileageStart!=='' && Number(t.MileageEnd)>=Number(t.MileageStart)) ? (Number(t.MileageEnd)-Number(t.MileageStart)) : '';
     const dest = [t.DestCode, t.DestName].filter(Boolean).join(' - ');
-    csv += [fmtDate(t.OutDate), fmtDate(t.InDate), dest, dist]
-      .map(v => `"${String(v??'').replace(/"/g,'""')}"`).join(',') + '\n';
+    const userDisplay = (t.UserIn && t.UserIn!==t.UserOut) ? `${t.UserOut||''}/${t.UserIn}` : (t.UserOut||'');
+    csv += [
+      i+1,
+      fmtDateShort(t.OutDate),
+      fmtDateShort(t.InDate),
+      dest,
+      plateDisplay(t.Plate),
+      userDisplay,
+      dist,
+      t.MileageStart ?? '',
+      t.MileageEnd ?? '',
+      t.PurposeType || '',
+      t.PurposeDetail || '',
+    ].join(T) + '\r\n';
   });
 
   const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
@@ -767,13 +792,22 @@ function runExport(){
 function setPlate(p){
   document.querySelectorAll('.plate-opt').forEach(el=>el.classList.toggle('sel', el.dataset.plate===p));
   document.getElementById('platePick').dataset.value = p;
+  const customInput = document.getElementById('f_plateCustom');
   const hint = document.getElementById('mStartHint');
-  if(!editingId){
-    const suggested = suggestStartMileage(p);
-    document.getElementById('f_mStart').value = suggested;
-    hint.textContent = suggested!=='' ? `ดึงมาจากไมค์สิ้นสุดของทริปล่าสุดของรถคันนี้ (${PLATES[p]}) แก้ไขได้` : `ยังไม่มีประวัติของรถคันนี้ กรอกเลขไมค์เริ่มต้นเอง`;
+  if(p==='OTHER'){
+    customInput.style.display = 'block';
+    customInput.focus();
+    if(!editingId){ document.getElementById('f_mStart').value = ''; }
+    hint.textContent = 'รถคันอื่นๆ ไม่มีประวัติไมค์ให้ดึงอัตโนมัติ กรอกเองได้เลย';
   } else {
-    hint.textContent = '';
+    customInput.style.display = 'none';
+    if(!editingId){
+      const suggested = suggestStartMileage(p);
+      document.getElementById('f_mStart').value = suggested;
+      hint.textContent = suggested!=='' ? `ดึงมาจากไมค์สิ้นสุดของทริปล่าสุดของรถคันนี้ (${PLATES[p]}) แก้ไขได้` : `ยังไม่มีประวัติของรถคันนี้ กรอกเลขไมค์เริ่มต้นเอง`;
+    } else {
+      hint.textContent = '';
+    }
   }
   updateDistPreview();
 }
@@ -816,7 +850,7 @@ async function init(){
     document.getElementById('modeBadge').style.display='none';
     const [tripsResult, branchesResult] = await Promise.allSettled([
       apiGetTrips(),
-      fetch(CONFIG.APPS_SCRIPT_URL + '?action=branches').then(r=>r.json())
+      fetch(CONFIG.API_URL + '/branches').then(r=>r.json())
     ]);
     if(tripsResult.status === 'fulfilled'){
       trips = tripsResult.value;
@@ -867,6 +901,7 @@ async function init(){
   document.getElementById('tripForm').addEventListener('submit', async (e)=>{
     e.preventDefault();
     const plate = document.getElementById('platePick').dataset.value || 'A';
+    const plateFinal = plate === 'OTHER' ? document.getElementById('f_plateCustom').value.trim() : plate;
     const destRaw = document.getElementById('f_dest').value.trim();
     const branch = findBranch(formBrand, destRaw);
     const destName = branch ? branch.name : destRaw;
@@ -882,11 +917,12 @@ async function init(){
       PurposeDetail: document.getElementById('f_purposeDetail').value.trim(),
       InDate: document.getElementById('f_inDate').value,
       UserIn: document.getElementById('f_userIn').value.trim(),
-      Plate: plate,
+      Plate: plateFinal,
       MileageStart: mStartRaw===''? '' : Number(mStartRaw),
       MileageEnd: mEndRaw===''? '' : Number(mEndRaw),
     };
     if(!payload.OutDate || !payload.UserOut || !payload.DestName){ showToast('กรอกข้อมูลที่จำเป็นให้ครบก่อนนะ'); return; }
+    if(plate==='OTHER' && !plateFinal){ showToast('กรอกทะเบียนรถให้ครบก่อนนะ'); return; }
 
     const saveBtn = document.getElementById('saveBtn');
     const saveBtnOriginal = saveBtn.innerHTML;
