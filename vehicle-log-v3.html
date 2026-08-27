@@ -488,6 +488,7 @@ input::placeholder{color:var(--tx3)}
   <div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-title"><svg class="ic" id="stopTitleIc"></svg><h2 id="stopTitle">เพิ่มจุดแวะ</h2></div>
+    <div class="gps-tag" id="stopPrevInfo" style="display:none;background:var(--panel);border:1px solid var(--line);border-radius:var(--r3);padding:9px 11px;margin-bottom:14px;font-size:12px;color:var(--tx2)"></div>
     <div class="field">
       <label>แบรนด์ปลายทาง</label>
       <div class="brand-tabs" id="stopBrandTabs">
@@ -657,6 +658,7 @@ function skeletonListHTML(n){
 }
 function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
 function fmtDate(iso){ if(!iso) return '-'; const d=new Date(iso+'T00:00:00'); return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear(); }
+function fmtTime(iso){ if(!iso) return ''; const d=new Date(iso.replace(' ','T')); if(isNaN(d)) return ''; const p=n=>String(n).padStart(2,'0'); return p(d.getHours())+':'+p(d.getMinutes())+' น.'; }
 function fmtDateShort(iso){ if(!iso) return ''; const d=new Date(iso+'T00:00:00'); const p=n=>String(n).padStart(2,'0'); return p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+String(d.getFullYear()).slice(-2); }
 function plateDisplay(p){ if(!p) return ''; return PLATES[p] || p; } // รองรับทะเบียนที่พิมพ์เอง (ไม่ใช่ A/B)
 function photoUrl(path){
@@ -935,7 +937,10 @@ function openCamera(hintText){
     const overlay = document.getElementById('cameraOverlay');
     overlay.classList.add('open');
     try{
-      _cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+      _cameraStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: false
+      });
       document.getElementById('cameraVideo').srcObject = _cameraStream;
     }catch(err){
       overlay.classList.remove('open');
@@ -951,8 +956,11 @@ function closeCameraStream(){
 function captureCameraPhoto(){
   const video = document.getElementById('cameraVideo');
   const canvas = document.getElementById('cameraCanvas');
-  canvas.width = video.videoWidth || 1280;
-  canvas.height = video.videoHeight || 720;
+  const MAX_W = 1280, MAX_H = 720;
+  let w = video.videoWidth || MAX_W, h = video.videoHeight || MAX_H;
+  const scale = Math.min(1, MAX_W / w, MAX_H / h); // กันไว้เผื่อเครื่องบางรุ่นเมิน ideal แล้วให้สตรีมใหญ่กว่านี้
+  canvas.width = Math.round(w * scale);
+  canvas.height = Math.round(h * scale);
   canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
   const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
   closeCameraStream();
@@ -1030,7 +1038,7 @@ function renderActiveTrips(){
   wrap.innerHTML = activeTrips.map(t=>`
     <div class="active-card" data-id="${t.ID}">
       <div class="active-card-top"><span class="active-dot"></span>กำลังเดินทาง · ${PLATES[t.Plate]||t.Plate}</div>
-      <div class="active-card-body">เริ่มจาก <b>Office / Mud</b> โดย <b>${escapeHtml(t.UserOut||'-')}</b> · ไมค์เริ่ม <b class="mono">${(t.MileageStart??'-').toLocaleString?.()||t.MileageStart}</b> · ล่าสุด <b class="mono">${t.MileageEnd??t.MileageStart}</b> กม.</div>
+      <div class="active-card-body"><b>${escapeHtml(t.UserOut||'-')}</b> · ไมค์ล่าสุด <b class="mono">${(t.MileageEnd??t.MileageStart??'-').toLocaleString?.()||(t.MileageEnd??t.MileageStart)}</b> กม.</div>
       <div class="active-card-actions">
         <button class="btn-addstop" data-action="addstop"><svg class="ic" viewBox="0 0 24 24">${ic('map-pin')}</svg>เพิ่มจุดแวะ</button>
         <button class="btn-finish" data-action="finish"><svg class="ic" viewBox="0 0 24 24">${ic('flag')}</svg>จบทริป</button>
@@ -1038,6 +1046,8 @@ function renderActiveTrips(){
     </div>`).join('');
   wrap.querySelectorAll('.active-card').forEach(card=>{
     const id = card.dataset.id;
+    card.querySelector('.active-card-body').style.cursor = 'pointer';
+    card.querySelector('.active-card-body').onclick = ()=>openDetail(id);
     card.querySelector('[data-action="addstop"]').onclick = ()=>openStopSheet(id, 'add');
     card.querySelector('[data-action="finish"]').onclick = ()=>openStopSheet(id, 'finish');
   });
@@ -1131,6 +1141,27 @@ function openStopSheet(tripId, mode){
   purposeChipsRender('', 'stopPurposeChips');
   setStopBrand('GD');
   document.getElementById('stopOverlay').classList.add('open');
+  loadPreviousPointInfo(tripId);
+}
+async function loadPreviousPointInfo(tripId){
+  const box = document.getElementById('stopPrevInfo');
+  box.style.display = 'none';
+  const trip = activeTrips.find(t=>t.ID==tripId);
+  if(!trip) return;
+  let lastLabel = 'Office / Mud', lastMileage = trip.MileageStart;
+  try{
+    if(!isDemo){
+      const r = await fetch(CONFIG.API_URL + '/trips/' + tripId + '/stops');
+      const j = await r.json();
+      if(j.ok && j.data.length){
+        const last = j.data[j.data.length-1];
+        lastLabel = [last.DestCode, last.DestName].filter(Boolean).join(' - ');
+        lastMileage = last.Mileage;
+      }
+    }
+  }catch(e){}
+  box.innerHTML = `<svg class="ic" viewBox="0 0 24 24">${ic('map-pin')}</svg>จุดก่อนหน้า: <b style="color:var(--tx)">${escapeHtml(lastLabel)}</b> · ไมค์ <b class="mono" style="color:var(--tx)">${(lastMileage??'-').toLocaleString?.()||lastMileage}</b>`;
+  box.style.display = 'flex';
 }
 async function stopTakePhoto(){
   const photo = await openCamera(stopMode==='finish' ? 'ถ่ายรูปยืนยันว่าจบงานที่นี่แล้ว' : 'ถ่ายรูปยืนยันว่าถึงหน้างานแล้ว');
@@ -1221,37 +1252,42 @@ async function openDetail(id){
   const destLabel = [trip.DestCode, trip.DestName, trip.PurposeType].filter(Boolean).join(' - ');
   const statusChip = trip.Status==='in_progress'
     ? `<span class="status-chip progress"><span class="active-dot" style="width:5px;height:5px"></span>กำลังเดินทาง</span>`
-    : `<span class="status-chip done">${ic('check')?'':''}เดินทางเสร็จแล้ว</span>`;
+    : `<span class="status-chip done">เดินทางเสร็จแล้ว</span>`;
 
   let html = `<div style="margin-bottom:10px">${statusChip}</div>`;
-  html += `<div class="detail-row"><span>วันที่ออกเดินทาง</span><span>${fmtDate(trip.OutDate)}</span></div>`;
-  html += `<div class="detail-row"><span>ผู้ใช้ (ผู้เบิกรถ)</span><span>${escapeHtml(trip.UserOut||'-')}</span></div>`;
-  html += `<div class="detail-row"><span>ทะเบียนรถ</span><span class="mono">${plateDisplay(trip.Plate)}</span></div>`;
-  html += `<div class="detail-row"><span>ปลายทาง</span><span>${escapeHtml(destLabel||'-')}</span></div>`;
+  html += `<div class="detail-row"><span>ผู้ใช้ · ทะเบียนรถ</span><span>${escapeHtml(trip.UserOut||'-')} · <span class="mono">${plateDisplay(trip.Plate)}</span></span></div>`;
+  html += `<div class="detail-row"><span>ระยะทางรวม</span><span class="mono">${dist!=null ? dist.toLocaleString()+' กม.' : '-'}</span></div>`;
   if(trip.PurposeDetail) html += `<div class="detail-row"><span>หมายเหตุ</span><span>${escapeHtml(trip.PurposeDetail)}</span></div>`;
-  html += `<div class="detail-row"><span>เลขไมค์เริ่ม → สิ้นสุด</span><span class="mono">${trip.MileageStart??'-'} → ${trip.MileageEnd??'-'}${dist?` (${dist.toLocaleString()} กม.)`:''}</span></div>`;
-  if(trip.InDate) html += `<div class="detail-row"><span>วันที่กลับ / ผู้คืนรถ</span><span>${fmtDate(trip.InDate)} · ${escapeHtml(trip.UserIn||'-')}</span></div>`;
 
-  if(trip.PhotoStart){
-    html += `<div class="detail-photo-block"><label>รูปเลขไมค์ก่อนออกเดินทาง</label><img class="photo-thumb zoomable" src="${photoUrl(trip.PhotoStart)}" onclick="openLightbox(this.src)"></div>`;
+  // ---------- Timeline: เล่าเป็นเรื่องราวว่าไปไหนมา เมื่อไหร่ ----------
+  html += `<div class="detail-photo-block"><label>เส้นทางการเดินทาง</label>`;
+
+  html += `<div class="stop-card">
+      <div class="stop-card-top"><span>ออกเดินทาง${trip.CreatedAt?' · '+fmtTime(trip.CreatedAt):''} · ${fmtDate(trip.OutDate)}</span></div>
+      <div class="stop-card-dest">Office / Mud <span class="mono" style="color:var(--tx3);font-size:11px">(ไมค์ ${trip.MileageStart??'-'})</span></div>
+      ${trip.PhotoStart?`<img class="photo-thumb zoomable" src="${photoUrl(trip.PhotoStart)}" onclick="openLightbox(this.src)">`:''}
+    </div>`;
+
+  stops.forEach(s=>{
+    const sLabel = [s.DestCode, s.DestName].filter(Boolean).join(' - ');
+    html += `<div class="stop-card">
+      <div class="stop-card-top"><span>แวะ #${s.Seq}${s.CreatedAt?' · '+fmtTime(s.CreatedAt):''}</span>
+        <button class="stop-del" data-stopid="${s.ID}"><svg class="ic" viewBox="0 0 24 24">${ic('trash')}</svg>ลบ</button>
+      </div>
+      <div class="stop-card-dest">${escapeHtml(sLabel||'-')}${s.PurposeType?` · ${escapeHtml(s.PurposeType)}`:''} <span class="mono" style="color:var(--tx3);font-size:11px">(ไมค์ ${s.Mileage??'-'})</span></div>
+      ${s.Photo?`<img class="photo-thumb zoomable" src="${photoUrl(s.Photo)}" style="max-height:120px" onclick="openLightbox(this.src)">`:''}
+    </div>`;
+  });
+
+  if(trip.Status==='completed'){
+    html += `<div class="stop-card">
+      <div class="stop-card-top"><span>ถึงปลายทาง${trip.UpdatedAt?' · '+fmtTime(trip.UpdatedAt):''} · ${fmtDate(trip.InDate)}</span></div>
+      <div class="stop-card-dest">${escapeHtml(destLabel||'-')} <span class="mono" style="color:var(--tx3);font-size:11px">(ไมค์ ${trip.MileageEnd??'-'})</span></div>
+      ${trip.PhotoEnd?`<img class="photo-thumb zoomable" src="${photoUrl(trip.PhotoEnd)}" onclick="openLightbox(this.src)">`:''}
+      <div style="font-size:11px;color:var(--tx3);margin-top:6px">ผู้คืนรถ: ${escapeHtml(trip.UserIn||'-')}</div>
+    </div>`;
   }
-  if(stops.length){
-    html += `<div class="detail-photo-block"><label>จุดแวะระหว่างทาง (${stops.length})</label>`;
-    stops.forEach(s=>{
-      const sLabel = [s.DestCode, s.DestName, s.PurposeType].filter(Boolean).join(' - ');
-      html += `<div class="stop-card">
-        <div class="stop-card-top"><span>#${s.Seq} · ไมค์ ${s.Mileage??'-'}</span>
-          <button class="stop-del" data-stopid="${s.ID}"><svg class="ic" viewBox="0 0 24 24">${ic('trash')}</svg>ลบ</button>
-        </div>
-        <div class="stop-card-dest">${escapeHtml(sLabel||'-')}</div>
-        ${s.Photo?`<img class="photo-thumb zoomable" src="${photoUrl(s.Photo)}" style="max-height:120px" onclick="openLightbox(this.src)">`:''}
-      </div>`;
-    });
-    html += `</div>`;
-  }
-  if(trip.PhotoEnd){
-    html += `<div class="detail-photo-block"><label>รูปยืนยันปลายทาง</label><img class="photo-thumb zoomable" src="${photoUrl(trip.PhotoEnd)}" onclick="openLightbox(this.src)"></div>`;
-  }
+  html += `</div>`;
 
   body.innerHTML = html;
   body.querySelectorAll('.stop-del').forEach(btn=>{
