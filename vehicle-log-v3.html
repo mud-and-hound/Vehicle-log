@@ -195,6 +195,61 @@ input::placeholder{color:var(--tx3)}
 
 .setup-note{margin:16px 18px 0;padding:12px 14px;background:var(--panel);border:1px dashed var(--line);border-radius:var(--r2);font-size:11.5px;color:var(--tx3);line-height:1.6}
 .setup-note code{font-family:var(--mono);background:var(--ink);padding:1px 5px;border-radius:4px;color:var(--amber)}
+/* ---------- Camera capture ---------- */
+.camera-overlay{position:fixed;inset:0;background:#000;z-index:200;display:none;flex-direction:column}
+.camera-overlay.open{display:flex}
+.camera-video{flex:1;width:100%;object-fit:cover;background:#000}
+.camera-bar{padding:16px;display:flex;align-items:center;justify-content:space-between;background:#000}
+.camera-cap-btn{width:66px;height:66px;border-radius:50%;background:#fff;border:4px solid rgba(255,255,255,.4);flex-shrink:0}
+.camera-side-btn{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.15);color:#fff;display:flex;align-items:center;justify-content:center}
+.camera-side-btn .ic{width:20px;height:20px}
+.camera-hint{color:rgba(255,255,255,.7);font-size:12px;text-align:center;padding:0 0 6px}
+.photo-thumb{width:100%;border-radius:var(--r2);border:1px solid var(--line);display:block;margin-top:8px;max-height:180px;object-fit:cover}
+.photo-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;border-radius:var(--r3);border:1.5px dashed var(--line);background:var(--panel);color:var(--tx2);font-size:13.5px;font-weight:500}
+.photo-btn.has-photo{border-style:solid;border-color:var(--amber);color:var(--amber)}
+.photo-btn .ic{width:16px;height:16px}
+.gps-tag{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:var(--tx3);margin-top:5px}
+.gps-tag .ic{width:11px;height:11px;color:var(--amber)}
+
+/* ---------- Active trip banner ---------- */
+.active-wrap{padding:0 18px;display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.active-card{background:var(--panel);border:1.5px solid var(--amber);border-radius:var(--r2);padding:12px 14px}
+.active-card-top{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--amber);font-weight:600}
+.active-dot{width:7px;height:7px;border-radius:50%;background:var(--amber);animation:pulse 1.4s ease infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.active-card-body{font-size:12.5px;color:var(--tx2);margin:6px 0 10px}
+.active-card-body b{color:var(--tx)}
+.active-card-actions{display:flex;gap:8px}
+.active-card-actions button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border-radius:var(--r3);font-size:12.5px;font-weight:600}
+.active-card-actions .ic{width:14px;height:14px}
+.btn-addstop{background:var(--ink);color:var(--tx2);border:1px solid var(--line)}
+.btn-finish{background:var(--amber);color:var(--amber-ink)}
+
+/* ---------- FAB menu ---------- */
+.fab-menu-overlay{position:fixed;inset:0;z-index:29;display:none}
+.fab-menu-overlay.open{display:block}
+.fab-menu{position:fixed;right:18px;bottom:84px;display:flex;flex-direction:column;gap:8px;z-index:30}
+.fab-menu button{display:flex;align-items:center;gap:9px;background:var(--panel);border:1px solid var(--line);border-radius:50px;padding:11px 18px 11px 14px;font-size:13px;color:var(--tx);font-weight:500;box-shadow:0 4px 14px rgba(58,47,34,.15);white-space:nowrap}
+.fab-menu .ic{width:16px;height:16px;color:var(--amber)}
+
+/* ---------- Detail view ---------- */
+.detail-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px}
+.detail-row:last-child{border-bottom:none}
+.detail-row span:first-child{color:var(--tx3)}
+.detail-row span:last-child{color:var(--tx);font-weight:500;text-align:right}
+.detail-photo-block{margin:12px 0}
+.detail-photo-block label{display:block;font-size:11.5px;color:var(--tx3);margin-bottom:6px;font-weight:500}
+.stop-card{background:var(--ink);border:1px solid var(--line);border-radius:var(--r3);padding:10px 12px;margin-bottom:8px}
+.stop-card-top{display:flex;justify-content:space-between;font-size:11px;color:var(--tx3);margin-bottom:4px}
+.stop-card-dest{font-size:13px;font-weight:500;color:var(--tx)}
+.stop-del{color:var(--bad);font-size:11px;display:flex;align-items:center;gap:3px}
+.stop-del .ic{width:11px;height:11px}
+.detail-actions{display:flex;gap:10px;margin-top:16px}
+.detail-actions button{flex:1;padding:12px;border-radius:var(--r3);font-size:13.5px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px}
+.detail-actions .ic{width:14px;height:14px}
+.status-chip{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;padding:3px 9px;border-radius:50px;font-weight:600}
+.status-chip.progress{background:rgba(255,176,32,.12);color:var(--amber)}
+.status-chip.done{background:rgba(61,220,132,.12);color:#3ddc84}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
@@ -244,6 +299,8 @@ input::placeholder{color:var(--tx3)}
   </div>
 </div>
 
+<div id="activeTripWrap" class="active-wrap"></div>
+
 <div id="listBox" class="list">
   <div class="sk-tbl">
     <div class="sk-row"><span class="sk-bar"></span><span class="sk-bar"></span><span class="sk-bar"></span><span class="sk-bar"></span><span class="sk-bar"></span><span class="sk-bar"></span></div>
@@ -257,6 +314,11 @@ input::placeholder{color:var(--tx3)}
   <b>เชื่อมต่อฐานข้อมูลเรียบร้อย</b> — ข้อมูลทริปและรายชื่อสาขาซิงก์แบบเรียลไทม์ ทุกคนในทีมเห็นข้อมูลชุดเดียวกัน
 </div>
 
+<div class="fab-menu-overlay" id="fabMenuOverlay"></div>
+<div class="fab-menu" id="fabMenu" style="display:none">
+  <button id="btnStartLive"><svg class="ic"></svg>เริ่มทริปสด (ถ่ายรูปจริง)</button>
+  <button id="btnAddManual"><svg class="ic"></svg>กรอกข้อมูลย้อนหลัง</button>
+</div>
 <button class="fab" id="addBtn" title="เพิ่มการเดินทางใหม่"><svg class="ic"></svg></button>
 
 <div class="overlay" id="overlay">
@@ -363,6 +425,105 @@ input::placeholder{color:var(--tx3)}
   </div>
 </div>
 
+<!-- กล้องถ่ายรูปสด -->
+<div class="camera-overlay" id="cameraOverlay">
+  <video class="camera-video" id="cameraVideo" autoplay playsinline muted></video>
+  <div class="camera-hint" id="cameraHint">ถ่ายให้เห็นเลขไมค์/หน้างานชัดเจน</div>
+  <div class="camera-bar">
+    <button type="button" class="camera-side-btn" id="cameraCancelBtn"><svg class="ic"></svg></button>
+    <button type="button" class="camera-cap-btn" id="cameraCapBtn"></button>
+    <div style="width:44px"></div>
+  </div>
+</div>
+<canvas id="cameraCanvas" style="display:none"></canvas>
+
+<!-- เริ่มทริปสด -->
+<div class="overlay" id="startTripOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title"><svg class="ic" id="startTripTitleIc"></svg><h2>เริ่มทริปสด</h2></div>
+    <div class="grid2">
+      <div class="field"><label>ผู้ใช้ (ผู้เบิกรถ)</label><input type="text" id="st_user" placeholder="ชื่อ" required></div>
+      <div class="field">
+        <label>ทะเบียนรถ</label>
+        <select id="st_plate">
+          <option value="A">3ฒ-7643</option>
+          <option value="B">3ฒภ-8066</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>เลขไมค์เริ่มต้น (ที่ Office)</label>
+      <input type="number" id="st_mileage" placeholder="เช่น 37131">
+    </div>
+    <div class="field">
+      <label>ถ่ายรูปเลขไมค์ก่อนออกเดินทาง</label>
+      <button type="button" class="photo-btn" id="st_photoBtn"><svg class="ic"></svg>ถ่ายรูปเลขไมค์</button>
+      <img id="st_photoPreview" class="photo-thumb" style="display:none">
+      <div class="gps-tag" id="st_gpsTag" style="display:none"><svg class="ic"></svg>บันทึกพิกัดแล้ว</div>
+    </div>
+    <div class="sheet-actions">
+      <button type="button" class="btn-cancel" id="st_cancelBtn"><svg class="ic"></svg>ยกเลิก</button>
+      <button type="button" class="btn-save" id="st_confirmBtn"><svg class="ic"></svg>เริ่มทริป</button>
+    </div>
+  </div>
+</div>
+
+<!-- จุดแวะ / จบทริป (ใช้ฟอร์มร่วมกัน) -->
+<div class="overlay" id="stopOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title"><svg class="ic" id="stopTitleIc"></svg><h2 id="stopTitle">เพิ่มจุดแวะ</h2></div>
+    <div class="field">
+      <label>แบรนด์ปลายทาง</label>
+      <div class="brand-tabs" id="stopBrandTabs">
+        <button type="button" data-brand="GD" class="active">GD</button>
+        <button type="button" data-brand="GHC">GHC</button>
+        <button type="button" data-brand="ABP">ABP</button>
+        <button type="button" data-brand="FF">FF</button>
+      </div>
+      <input type="text" id="stop_dest" list="stopDestList" placeholder="พิมพ์ชื่อสาขาหรือเลขสาขา" autocomplete="off">
+      <datalist id="stopDestList"></datalist>
+    </div>
+    <div class="field">
+      <label>รายละเอียด / วัตถุประสงค์</label>
+      <div class="chips-wrap" id="stopPurposeChips"></div>
+      <input type="text" id="stop_purposeDetail" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)" style="margin-top:8px">
+    </div>
+    <div class="field">
+      <label>เลขไมค์ ณ จุดนี้</label>
+      <input type="number" id="stop_mileage" placeholder="เช่น 37139">
+    </div>
+    <div class="field" id="stop_userInField" style="display:none">
+      <label>ผู้คืนรถ</label>
+      <input type="text" id="stop_userIn" placeholder="ชื่อ">
+    </div>
+    <div class="field">
+      <label id="stop_photoLabel">ถ่ายรูปยืนยันว่าถึงหน้างานแล้ว</label>
+      <button type="button" class="photo-btn" id="stop_photoBtn"><svg class="ic"></svg>ถ่ายรูปหน้างาน</button>
+      <img id="stop_photoPreview" class="photo-thumb" style="display:none">
+      <div class="gps-tag" id="stop_gpsTag" style="display:none"><svg class="ic"></svg>บันทึกพิกัดแล้ว</div>
+    </div>
+    <div class="sheet-actions">
+      <button type="button" class="btn-cancel" id="stop_cancelBtn"><svg class="ic"></svg>ยกเลิก</button>
+      <button type="button" class="btn-save" id="stop_confirmBtn"><svg class="ic"></svg>บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- หน้าดูรายละเอียดทริป (อ่านอย่างเดียว) -->
+<div class="overlay" id="detailOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title"><svg class="ic" id="detailTitleIc"></svg><h2>รายละเอียดทริป</h2></div>
+    <div id="detailBody"></div>
+    <div class="detail-actions">
+      <button type="button" class="btn-cancel" id="detail_closeBtn"><svg class="ic"></svg>ปิด</button>
+      <button type="button" class="btn-save" id="detail_editBtn"><svg class="ic"></svg>แก้ไข</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -370,6 +531,9 @@ const SVGICONS = {"route":"<path d=\"M5.005,24.006c-.548,0-1.097-.198-1.524-.596
 function ic(name){
   if(name==='check' && !SVGICONS.check){ SVGICONS.check='<path d="M9.55 17.65 4.9 13l1.4-1.4 3.25 3.25 8.15-8.15L19.1 8l-9.55 9.65Z"/>'; }
   if(name==='file-export' && !SVGICONS['file-export']){ SVGICONS['file-export']='<path d="M18.83,21.77c-.21-.18-.52-.16-.71,.04-.66,.75-1.62,1.19-2.62,1.19H4.5c-1.93,0-3.5-1.57-3.5-3.5V4.5c0-1.93,1.57-3.5,3.5-3.5h5.51c.33,0,.66,.03,.99,.09V6.5c0,1.38,1.12,2.5,2.5,2.5h5.41c.06,.32,.09,.65,.09,.99v.51c0,.28,.22,.5,.5,.5s.5-.22,.5-.5v-.51c0-1.74-.68-3.37-1.9-4.6l-3.48-3.48c-1.23-1.23-2.86-1.9-4.6-1.9H4.5C2.02,0,0,2.02,0,4.5v15c0,2.48,2.02,4.5,4.5,4.5H15.5c1.29,0,2.52-.56,3.38-1.52,.18-.21,.16-.52-.04-.71Zm-1.44-15.67c.55,.55,.97,1.2,1.24,1.9h-5.13c-.83,0-1.5-.67-1.5-1.5V1.37c.71,.27,1.35,.69,1.9,1.24l3.48,3.48Zm6.61,10.41c0,.5-.19,1-.58,1.38l-2.57,2.52c-.1,.09-.22,.14-.35,.14s-.26-.05-.36-.15c-.19-.2-.19-.51,0-.71l2.57-2.51c.06-.06,.1-.12,.14-.18H13.5c-.28,0-.5-.22-.5-.5s.22-.5,.5-.5h9.36c-.04-.07-.09-.13-.15-.19l-2.57-2.51c-.2-.19-.2-.51,0-.71,.19-.2,.51-.2,.71,0l2.57,2.51c.38,.38,.58,.89,.58,1.39,0,0,0,0,0,0s0,0,0,0Z"/>'; }
+  if(name==='camera' && !SVGICONS.camera){ SVGICONS.camera='<path d="M9 2a1 1 0 0 0-.8.4L6.75 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2.75L15.8 2.4A1 1 0 0 0 15 2H9Zm3 6a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/>'; }
+  if(name==='flag' && !SVGICONS.flag){ SVGICONS.flag='<path d="M5 2a1 1 0 0 1 1 1v18a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1Zm2 1.2h11.3a.5.5 0 0 1 .38.82L15.8 8l2.88 3.98a.5.5 0 0 1-.38.82H7V3.2Z"/>'; }
+  if(name==='gps' && !SVGICONS.gps){ SVGICONS.gps='<path d="M12 2a1 1 0 0 1 1 1v1.06A8 8 0 0 1 20.94 11H22a1 1 0 1 1 0 2h-1.06A8 8 0 0 1 13 20.94V22a1 1 0 1 1-2 0v-1.06A8 8 0 0 1 3.06 13H2a1 1 0 1 1 0-2h1.06A8 8 0 0 1 11 3.06V2a1 1 0 0 1 1-1Zm0 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12Zm0 3.5A2.5 2.5 0 1 1 9.5 12 2.5 2.5 0 0 1 12 9.5Z"/>'; }
   return (SVGICONS[name]||'').toString();
 }
 function paintIcon(el, name){ el.innerHTML = ic(name); el.setAttribute('viewBox','0 0 24 24'); }
@@ -518,11 +682,13 @@ function padShopId(id){
   const s = String(id);
   return /^\d+$/.test(s) ? s.padStart(4,'0') : s;
 }
-function populateDestList(brand){
-  const dl = document.getElementById('destList');
+function populateDestList(brand, targetId){
+  const dl = document.getElementById(targetId || 'destList');
   const list = BRANCHES.filter(b=>b.brand===brand);
   dl.innerHTML = list.map(b=>`<option value="${escapeHtml(padShopId(b.shopId))} - ${escapeHtml(b.code)} - ${escapeHtml(b.name)}">`).join('');
-  document.getElementById('destCount').textContent = `${list.length.toLocaleString()} สาขาในแบรนด์ ${brand} · ค้นหาได้ทั้งเลขสาขา, ชื่อย่อ, หรือชื่อเต็ม`;
+  if(!targetId && document.getElementById('destCount')){
+    document.getElementById('destCount').textContent = `${list.length.toLocaleString()} สาขาในแบรนด์ ${brand} · ค้นหาได้ทั้งเลขสาขา, ชื่อย่อ, หรือชื่อเต็ม`;
+  }
 }
 function findBranch(brand, raw){
   const s = String(raw).trim().toLowerCase();
@@ -539,12 +705,12 @@ function destDisplayValue(brand, code, name){
   return b ? `${padShopId(b.shopId)} - ${b.code} - ${b.name}` : (name||'');
 }
 
-function purposeChipsRender(selected){
-  const box = document.getElementById('purposeChips');
+function purposeChipsRender(selected, targetId){
+  const box = document.getElementById(targetId || 'purposeChips');
   box.innerHTML = PURPOSES.map(p=>`<button type="button" class="chip ${p===selected?'active':''}" data-p="${p}">${p}</button>`).join('');
   box.querySelectorAll('.chip').forEach(c=>{ c.onclick=()=>{ box.querySelectorAll('.chip').forEach(x=>x.classList.remove('active')); c.classList.add('active'); }; });
 }
-function getSelectedPurpose(){ const el=document.querySelector('#purposeChips .chip.active'); return el?el.dataset.p:''; }
+function getSelectedPurpose(targetId){ const el=document.querySelector('#'+(targetId||'purposeChips')+' .chip.active'); return el?el.dataset.p:''; }
 
 function suggestStartMileage(plate){
   const cand = trips.filter(t=>t.Plate===plate && t.MileageEnd!=null && t.MileageEnd!=='').sort((a,b)=>(a.OutDate||'').localeCompare(b.OutDate||''));
@@ -663,7 +829,7 @@ function render(){
   box.querySelectorAll('.trow').forEach(rowEl=>{
     rowEl.addEventListener('click', (e)=>{
       if(e.target.closest('.trow-del')) return;
-      openEdit(rowEl.dataset.id);
+      openDetail(rowEl.dataset.id);
     });
   });
   box.querySelectorAll('.trow-del').forEach(btn=>{
@@ -736,6 +902,341 @@ function openEdit(id){
 }
 
 function closeSheet(){ document.getElementById('overlay').classList.remove('open'); }
+
+/* ============================================================
+   กล้องถ่ายรูปสด (บังคับใช้กล้องจริงเท่านั้น ไม่ใช้แกลลอรี่)
+   ============================================================ */
+let _cameraStream = null;
+let _cameraResolve = null;
+
+function openCamera(hintText){
+  return new Promise(async (resolve)=>{
+    _cameraResolve = resolve;
+    document.getElementById('cameraHint').textContent = hintText || 'ถ่ายให้เห็นเลขไมค์/หน้างานชัดเจน';
+    const overlay = document.getElementById('cameraOverlay');
+    overlay.classList.add('open');
+    try{
+      _cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false });
+      document.getElementById('cameraVideo').srcObject = _cameraStream;
+    }catch(err){
+      overlay.classList.remove('open');
+      showToast('เปิดกล้องไม่ได้ — เช็คว่าอนุญาตสิทธิ์กล้องให้เว็บนี้แล้วหรือยัง');
+      resolve(null);
+    }
+  });
+}
+function closeCameraStream(){
+  if(_cameraStream){ _cameraStream.getTracks().forEach(t=>t.stop()); _cameraStream = null; }
+  document.getElementById('cameraOverlay').classList.remove('open');
+}
+function captureCameraPhoto(){
+  const video = document.getElementById('cameraVideo');
+  const canvas = document.getElementById('cameraCanvas');
+  canvas.width = video.videoWidth || 1280;
+  canvas.height = video.videoHeight || 720;
+  canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+  closeCameraStream();
+  if(_cameraResolve) _cameraResolve(dataUrl);
+  _cameraResolve = null;
+}
+function cancelCamera(){
+  closeCameraStream();
+  if(_cameraResolve) _cameraResolve(null);
+  _cameraResolve = null;
+}
+
+/* ============================================================
+   GPS
+   ============================================================ */
+function getGps(){
+  return new Promise((resolve)=>{
+    if(!navigator.geolocation){ resolve(''); return; }
+    navigator.geolocation.getCurrentPosition(
+      pos => resolve(`${pos.coords.latitude.toFixed(6)},${pos.coords.longitude.toFixed(6)}`),
+      () => resolve(''),
+      { timeout: 6000, maximumAge: 30000 }
+    );
+  });
+}
+
+/* ============================================================
+   อัปโหลดรูป
+   ============================================================ */
+async function uploadPhotoDataUrl(dataUrl){
+  if(isDemo) return dataUrl; // โหมดตัวอย่าง เก็บ data URL ไว้ในหน่วยความจำเฉยๆ พอ
+  const r = await fetch(CONFIG.API_URL + '/uploads', {
+    method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ image: dataUrl })
+  });
+  if(!r.ok) throw new Error('upload failed');
+  const j = await r.json();
+  return j.url;
+}
+
+/* ============================================================
+   FAB menu
+   ============================================================ */
+function toggleFabMenu(show){
+  document.getElementById('fabMenu').style.display = show ? 'flex' : 'none';
+  document.getElementById('fabMenuOverlay').classList.toggle('open', show);
+}
+
+/* ============================================================
+   ทริปที่กำลังเดินทางอยู่ (active)
+   ============================================================ */
+let activeTrips = [];
+async function loadActiveTrips(){
+  if(isDemo){ activeTrips = trips.filter(t=>t.Status==='in_progress'); renderActiveTrips(); return; }
+  try{
+    const r = await fetch(CONFIG.API_URL + '/trips/active');
+    const j = await r.json();
+    activeTrips = j.ok ? j.data : [];
+  }catch(e){ activeTrips = []; }
+  renderActiveTrips();
+}
+function renderActiveTrips(){
+  const wrap = document.getElementById('activeTripWrap');
+  if(activeTrips.length===0){ wrap.innerHTML=''; return; }
+  wrap.innerHTML = activeTrips.map(t=>`
+    <div class="active-card" data-id="${t.ID}">
+      <div class="active-card-top"><span class="active-dot"></span>กำลังเดินทาง · ${PLATES[t.Plate]||t.Plate}</div>
+      <div class="active-card-body">เริ่มจาก <b>Office / Mud</b> โดย <b>${escapeHtml(t.UserOut||'-')}</b> · ไมค์เริ่ม <b class="mono">${(t.MileageStart??'-').toLocaleString?.()||t.MileageStart}</b> · ล่าสุด <b class="mono">${t.MileageEnd??t.MileageStart}</b> กม.</div>
+      <div class="active-card-actions">
+        <button class="btn-addstop" data-action="addstop"><svg class="ic" viewBox="0 0 24 24">${ic('map-pin')}</svg>เพิ่มจุดแวะ</button>
+        <button class="btn-finish" data-action="finish"><svg class="ic" viewBox="0 0 24 24">${ic('flag')}</svg>จบทริป</button>
+      </div>
+    </div>`).join('');
+  wrap.querySelectorAll('.active-card').forEach(card=>{
+    const id = card.dataset.id;
+    card.querySelector('[data-action="addstop"]').onclick = ()=>openStopSheet(id, 'add');
+    card.querySelector('[data-action="finish"]').onclick = ()=>openStopSheet(id, 'finish');
+  });
+}
+
+/* ============================================================
+   เริ่มทริปสด
+   ============================================================ */
+let stPhotoDataUrl = null, stGps = '';
+function openStartTrip(){
+  document.getElementById('st_user').value = '';
+  document.getElementById('st_plate').value = 'A';
+  document.getElementById('st_mileage').value = suggestStartMileage('A');
+  stPhotoDataUrl = null; stGps = '';
+  document.getElementById('st_photoPreview').style.display = 'none';
+  document.getElementById('st_photoBtn').classList.remove('has-photo');
+  document.getElementById('st_photoBtn').innerHTML = `<svg class="ic" viewBox="0 0 24 24">${ic('camera')}</svg>ถ่ายรูปเลขไมค์`;
+  document.getElementById('st_gpsTag').style.display = 'none';
+  document.getElementById('startTripOverlay').classList.add('open');
+}
+async function startTripTakePhoto(){
+  const photo = await openCamera('ถ่ายรูปเลขไมค์หน้ารถให้ชัดเจน');
+  if(!photo) return;
+  stPhotoDataUrl = photo;
+  document.getElementById('st_photoPreview').src = photo;
+  document.getElementById('st_photoPreview').style.display = 'block';
+  document.getElementById('st_photoBtn').classList.add('has-photo');
+  document.getElementById('st_photoBtn').innerHTML = `<svg class="ic" viewBox="0 0 24 24">${ic('check')}</svg>ถ่ายใหม่อีกครั้ง`;
+  getGps().then(g=>{ stGps = g; if(g) document.getElementById('st_gpsTag').style.display='inline-flex'; });
+}
+async function confirmStartTrip(){
+  const user = document.getElementById('st_user').value.trim();
+  const plate = document.getElementById('st_plate').value;
+  const mileage = document.getElementById('st_mileage').value;
+  if(!user || mileage===''){ showToast('กรอกผู้ใช้และเลขไมค์ให้ครบก่อนนะ'); return; }
+  if(!stPhotoDataUrl){ showToast('ถ่ายรูปเลขไมค์ก่อนออกเดินทางก่อนนะ'); return; }
+  const btn = document.getElementById('st_confirmBtn');
+  const orig = btn.innerHTML;
+  btn.disabled = true; btn.innerHTML = '<span class="spin-sm"></span> กำลังเริ่มทริป...';
+  try{
+    const photoUrl = await uploadPhotoDataUrl(stPhotoDataUrl);
+    const payload = {
+      OutDate: new Date().toISOString().slice(0,10),
+      UserOut: user, Plate: plate, MileageStart: Number(mileage),
+      PhotoStart: photoUrl, GpsStart: stGps,
+    };
+    if(isDemo){
+      const id = uid();
+      trips.push({ID:id, OutDate:payload.OutDate, UserOut:user, Brand:'', DestCode:'', DestName:'', PurposeType:'', PurposeDetail:'',
+        InDate:'', UserIn:'', Plate:plate, MileageStart:Number(mileage), MileageEnd:Number(mileage),
+        Status:'in_progress', PhotoStart:photoUrl, PhotoEnd:'', GpsStart:stGps, GpsEnd:''});
+    } else {
+      const r = await fetch(CONFIG.API_URL + '/trips/start', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+      if(!r.ok) throw new Error('start failed');
+    }
+    document.getElementById('startTripOverlay').classList.remove('open');
+    await loadActiveTrips();
+    trips = await apiGetTrips();
+    render();
+    showToast('เริ่มทริปแล้ว ถ่ายรูปที่จุดแวะ/ปลายทางได้เลยเมื่อถึง');
+  }catch(err){
+    showToast('เริ่มทริปไม่สำเร็จ เช็คการเชื่อมต่อแล้วลองใหม่');
+  }
+  btn.disabled = false; btn.innerHTML = orig;
+}
+
+/* ============================================================
+   จุดแวะ / จบทริป (ฟอร์มร่วมกัน)
+   ============================================================ */
+let stopMode = 'add', stopTripId = null, stopPhotoDataUrl = null, stopGps = '', stopFormBrand = 'GD';
+function setStopBrand(b){
+  stopFormBrand = b;
+  document.querySelectorAll('#stopBrandTabs button').forEach(x=>x.classList.toggle('active', x.dataset.brand===b));
+  populateDestList(b, 'stopDestList');
+  document.getElementById('stop_dest').value = '';
+}
+function openStopSheet(tripId, mode){
+  stopMode = mode; stopTripId = tripId;
+  stopPhotoDataUrl = null; stopGps = '';
+  document.getElementById('stopTitle').textContent = mode==='finish' ? 'จบทริป — ปลายทางสุดท้าย' : 'เพิ่มจุดแวะ';
+  document.getElementById('stop_photoLabel').textContent = mode==='finish' ? 'ถ่ายรูปยืนยันว่าจบงานแล้ว' : 'ถ่ายรูปยืนยันว่าถึงหน้างานแล้ว';
+  document.getElementById('stop_userInField').style.display = mode==='finish' ? 'block' : 'none';
+  document.getElementById('stop_dest').value = '';
+  document.getElementById('stop_purposeDetail').value = '';
+  document.getElementById('stop_mileage').value = '';
+  document.getElementById('stop_userIn').value = '';
+  document.getElementById('stop_photoPreview').style.display = 'none';
+  document.getElementById('stop_photoBtn').classList.remove('has-photo');
+  document.getElementById('stop_photoBtn').innerHTML = `<svg class="ic" viewBox="0 0 24 24">${ic('camera')}</svg>ถ่ายรูปหน้างาน`;
+  document.getElementById('stop_gpsTag').style.display = 'none';
+  purposeChipsRender('', 'stopPurposeChips');
+  setStopBrand('GD');
+  document.getElementById('stopOverlay').classList.add('open');
+}
+async function stopTakePhoto(){
+  const photo = await openCamera(stopMode==='finish' ? 'ถ่ายรูปยืนยันว่าจบงานที่นี่แล้ว' : 'ถ่ายรูปยืนยันว่าถึงหน้างานแล้ว');
+  if(!photo) return;
+  stopPhotoDataUrl = photo;
+  document.getElementById('stop_photoPreview').src = photo;
+  document.getElementById('stop_photoPreview').style.display = 'block';
+  document.getElementById('stop_photoBtn').classList.add('has-photo');
+  document.getElementById('stop_photoBtn').innerHTML = `<svg class="ic" viewBox="0 0 24 24">${ic('check')}</svg>ถ่ายใหม่อีกครั้ง`;
+  getGps().then(g=>{ stopGps = g; if(g) document.getElementById('stop_gpsTag').style.display='inline-flex'; });
+}
+async function confirmStop(){
+  const destRaw = document.getElementById('stop_dest').value.trim();
+  const branch = findBranch(stopFormBrand, destRaw);
+  const destName = branch ? branch.name : destRaw;
+  const mileage = document.getElementById('stop_mileage').value;
+  if(!destName || mileage===''){ showToast('กรอกปลายทางและเลขไมค์ให้ครบก่อนนะ'); return; }
+  if(!stopPhotoDataUrl){ showToast('ถ่ายรูปยืนยันก่อนนะ'); return; }
+  if(stopMode==='finish' && !document.getElementById('stop_userIn').value.trim()){ showToast('กรอกชื่อผู้คืนรถก่อนนะ'); return; }
+
+  const btn = document.getElementById('stop_confirmBtn');
+  const orig = btn.innerHTML;
+  btn.disabled = true; btn.innerHTML = '<span class="spin-sm"></span> กำลังบันทึก...';
+  try{
+    const photoUrl = await uploadPhotoDataUrl(stopPhotoDataUrl);
+    const base = {
+      Brand: stopFormBrand, DestCode: branch?branch.code:'', DestName: destName,
+      PurposeType: getSelectedPurpose('stopPurposeChips'), PurposeDetail: document.getElementById('stop_purposeDetail').value.trim(),
+      Mileage: Number(mileage), Photo: photoUrl, Gps: stopGps,
+    };
+    if(isDemo){
+      const t = trips.find(x=>x.ID===stopTripId);
+      if(t){
+        t.MileageEnd = Number(mileage);
+        if(stopMode==='finish'){
+          Object.assign(t, {Brand:base.Brand, DestCode:base.DestCode, DestName:base.DestName, PurposeType:base.PurposeType,
+            PurposeDetail:base.PurposeDetail, PhotoEnd:photoUrl, GpsEnd:stopGps, Status:'completed',
+            InDate:new Date().toISOString().slice(0,10), UserIn:document.getElementById('stop_userIn').value.trim()});
+        }
+      }
+    } else if(stopMode==='finish'){
+      const payload = {...base, InDate:new Date().toISOString().slice(0,10), UserIn:document.getElementById('stop_userIn').value.trim()};
+      const r = await fetch(CONFIG.API_URL + '/trips/' + stopTripId + '/finish', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+      if(!r.ok) throw new Error('finish failed');
+    } else {
+      const r = await fetch(CONFIG.API_URL + '/trips/' + stopTripId + '/stops', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(base)});
+      if(!r.ok) throw new Error('add stop failed');
+    }
+    document.getElementById('stopOverlay').classList.remove('open');
+    await loadActiveTrips();
+    trips = await apiGetTrips();
+    render();
+    showToast(stopMode==='finish' ? 'จบทริปเรียบร้อยแล้ว' : 'บันทึกจุดแวะแล้ว');
+  }catch(err){
+    showToast('บันทึกไม่สำเร็จ เช็คการเชื่อมต่อแล้วลองใหม่');
+  }
+  btn.disabled = false; btn.innerHTML = orig;
+}
+
+/* ============================================================
+   หน้าดูรายละเอียดทริป
+   ============================================================ */
+let detailTripId = null;
+async function openDetail(id){
+  detailTripId = id;
+  const body = document.getElementById('detailBody');
+  body.innerHTML = '<div class="spin"></div>';
+  document.getElementById('detailOverlay').classList.add('open');
+
+  let trip, stops = [];
+  if(isDemo){
+    trip = trips.find(t=>t.ID===id);
+    stops = [];
+  } else {
+    try{
+      const r = await fetch(CONFIG.API_URL + '/trips/' + id + '/detail');
+      const j = await r.json();
+      if(!j.ok) throw new Error();
+      trip = j.trip; stops = j.stops;
+    }catch(e){
+      trip = trips.find(t=>t.ID===id);
+      stops = [];
+    }
+  }
+  if(!trip){ body.innerHTML = '<div class="empty">ไม่พบข้อมูล</div>'; return; }
+
+  const dist = (trip.MileageEnd!=null && trip.MileageEnd!=='' && trip.MileageStart!=null && trip.MileageStart!=='' && Number(trip.MileageEnd)>=Number(trip.MileageStart)) ? (Number(trip.MileageEnd)-Number(trip.MileageStart)) : null;
+  const destLabel = [trip.DestCode, trip.DestName, trip.PurposeType].filter(Boolean).join(' - ');
+  const statusChip = trip.Status==='in_progress'
+    ? `<span class="status-chip progress"><span class="active-dot" style="width:5px;height:5px"></span>กำลังเดินทาง</span>`
+    : `<span class="status-chip done">${ic('check')?'':''}เดินทางเสร็จแล้ว</span>`;
+
+  let html = `<div style="margin-bottom:10px">${statusChip}</div>`;
+  html += `<div class="detail-row"><span>วันที่ออกเดินทาง</span><span>${fmtDate(trip.OutDate)}</span></div>`;
+  html += `<div class="detail-row"><span>ผู้ใช้ (ผู้เบิกรถ)</span><span>${escapeHtml(trip.UserOut||'-')}</span></div>`;
+  html += `<div class="detail-row"><span>ทะเบียนรถ</span><span class="mono">${plateDisplay(trip.Plate)}</span></div>`;
+  html += `<div class="detail-row"><span>ปลายทาง</span><span>${escapeHtml(destLabel||'-')}</span></div>`;
+  if(trip.PurposeDetail) html += `<div class="detail-row"><span>หมายเหตุ</span><span>${escapeHtml(trip.PurposeDetail)}</span></div>`;
+  html += `<div class="detail-row"><span>เลขไมค์เริ่ม → สิ้นสุด</span><span class="mono">${trip.MileageStart??'-'} → ${trip.MileageEnd??'-'}${dist?` (${dist.toLocaleString()} กม.)`:''}</span></div>`;
+  if(trip.InDate) html += `<div class="detail-row"><span>วันที่กลับ / ผู้คืนรถ</span><span>${fmtDate(trip.InDate)} · ${escapeHtml(trip.UserIn||'-')}</span></div>`;
+
+  if(trip.PhotoStart){
+    html += `<div class="detail-photo-block"><label>รูปเลขไมค์ก่อนออกเดินทาง</label><img class="photo-thumb" src="${trip.PhotoStart}"></div>`;
+  }
+  if(stops.length){
+    html += `<div class="detail-photo-block"><label>จุดแวะระหว่างทาง (${stops.length})</label>`;
+    stops.forEach(s=>{
+      const sLabel = [s.DestCode, s.DestName, s.PurposeType].filter(Boolean).join(' - ');
+      html += `<div class="stop-card">
+        <div class="stop-card-top"><span>#${s.Seq} · ไมค์ ${s.Mileage??'-'}</span>
+          <button class="stop-del" data-stopid="${s.ID}"><svg class="ic" viewBox="0 0 24 24">${ic('trash')}</svg>ลบ</button>
+        </div>
+        <div class="stop-card-dest">${escapeHtml(sLabel||'-')}</div>
+        ${s.Photo?`<img class="photo-thumb" src="${s.Photo}" style="max-height:120px">`:''}
+      </div>`;
+    });
+    html += `</div>`;
+  }
+  if(trip.PhotoEnd){
+    html += `<div class="detail-photo-block"><label>รูปยืนยันปลายทาง</label><img class="photo-thumb" src="${trip.PhotoEnd}"></div>`;
+  }
+
+  body.innerHTML = html;
+  body.querySelectorAll('.stop-del').forEach(btn=>{
+    btn.onclick = async ()=>{
+      if(!confirm('ลบจุดแวะนี้ใช่ไหม?')) return;
+      if(isDemo){ showToast('โหมดตัวอย่างไม่รองรับการลบจุดแวะ'); return; }
+      try{
+        await fetch(CONFIG.API_URL + '/stops/' + btn.dataset.stopid, {method:'DELETE'});
+        openDetail(id);
+      }catch(e){ showToast('ลบไม่สำเร็จ'); }
+    };
+  });
+}
+
+
 
 function openExport(){
   const now = new Date();
@@ -838,6 +1339,20 @@ function paintAllStaticIcons(){
   paintIcon(document.getElementById('exportTitleIc'), 'file-export');
   paintIcon(document.querySelector('#exportCancelBtn .ic'), 'close');
   paintIcon(document.querySelector('#exportConfirmBtn .ic'), 'file-export');
+  paintIcon(document.querySelector('#btnStartLive .ic'), 'camera');
+  paintIcon(document.querySelector('#btnAddManual .ic'), 'pencil');
+  paintIcon(document.getElementById('cameraCancelBtn').querySelector('.ic'), 'close');
+  paintIcon(document.getElementById('startTripTitleIc'), 'camera');
+  paintIcon(document.querySelector('#st_cancelBtn .ic'), 'close');
+  paintIcon(document.querySelector('#st_confirmBtn .ic'), 'check');
+  paintIcon(document.getElementById('st_gpsTag').querySelector('.ic'), 'gps');
+  paintIcon(document.getElementById('stopTitleIc'), 'map-pin');
+  paintIcon(document.querySelector('#stop_cancelBtn .ic'), 'close');
+  paintIcon(document.querySelector('#stop_confirmBtn .ic'), 'check');
+  paintIcon(document.getElementById('stop_gpsTag').querySelector('.ic'), 'gps');
+  paintIcon(document.getElementById('detailTitleIc'), 'route');
+  paintIcon(document.querySelector('#detail_closeBtn .ic'), 'close');
+  paintIcon(document.querySelector('#detail_editBtn .ic'), 'pencil');
 }
 
 async function init(){
@@ -869,7 +1384,35 @@ async function init(){
   }
   render();
 
-  document.getElementById('addBtn').onclick = openAdd;
+  document.getElementById('addBtn').onclick = ()=>toggleFabMenu(true);
+  document.getElementById('fabMenuOverlay').onclick = ()=>toggleFabMenu(false);
+  document.getElementById('btnStartLive').onclick = ()=>{ toggleFabMenu(false); openStartTrip(); };
+  document.getElementById('btnAddManual').onclick = ()=>{ toggleFabMenu(false); openAdd(); };
+
+  // กล้อง
+  document.getElementById('cameraCapBtn').onclick = captureCameraPhoto;
+  document.getElementById('cameraCancelBtn').onclick = cancelCamera;
+
+  // เริ่มทริปสด
+  document.getElementById('st_photoBtn').onclick = startTripTakePhoto;
+  document.getElementById('st_cancelBtn').onclick = ()=>document.getElementById('startTripOverlay').classList.remove('open');
+  document.getElementById('st_confirmBtn').onclick = confirmStartTrip;
+  document.getElementById('st_plate').addEventListener('change', (e)=>{ document.getElementById('st_mileage').value = suggestStartMileage(e.target.value); });
+  document.getElementById('startTripOverlay').addEventListener('click',(e)=>{ if(e.target.id==='startTripOverlay') e.currentTarget.classList.remove('open'); });
+
+  // จุดแวะ / จบทริป
+  document.getElementById('stopBrandTabs').addEventListener('click',(e)=>{ const b=e.target.closest('button'); if(b) setStopBrand(b.dataset.brand); });
+  document.getElementById('stop_photoBtn').onclick = stopTakePhoto;
+  document.getElementById('stop_cancelBtn').onclick = ()=>document.getElementById('stopOverlay').classList.remove('open');
+  document.getElementById('stop_confirmBtn').onclick = confirmStop;
+  document.getElementById('stopOverlay').addEventListener('click',(e)=>{ if(e.target.id==='stopOverlay') e.currentTarget.classList.remove('open'); });
+
+  // หน้าดูรายละเอียด
+  document.getElementById('detail_closeBtn').onclick = ()=>document.getElementById('detailOverlay').classList.remove('open');
+  document.getElementById('detail_editBtn').onclick = ()=>{ document.getElementById('detailOverlay').classList.remove('open'); openEdit(detailTripId); };
+  document.getElementById('detailOverlay').addEventListener('click',(e)=>{ if(e.target.id==='detailOverlay') e.currentTarget.classList.remove('open'); });
+
+  loadActiveTrips();
   document.getElementById('cancelBtn').onclick = closeSheet;
   document.getElementById('overlay').addEventListener('click',(e)=>{ if(e.target.id==='overlay') closeSheet(); });
 
