@@ -114,7 +114,10 @@ input::placeholder{color:var(--tx3)}
 .trow-seq{font-family:var(--mono);font-size:11px;color:var(--tx3)}
 .trow-dest-main{font-size:12.5px;font-weight:500;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .trow-dest-sub{font-family:var(--mono);font-size:10px;color:var(--tx3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.trow-brand,.trow-user{font-size:11px;color:var(--tx2);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trow-brand{font-size:11px;color:var(--tx2);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trow-user{text-align:center;overflow:hidden;line-height:1.3}
+.trow-user b{display:block;font-size:12px;font-weight:700;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trow-user .plate-tag{display:block;font-family:var(--mono);font-size:9.5px;color:var(--amber);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .trow-km{display:flex;flex-direction:column;align-items:flex-end;justify-content:center;line-height:1.25;overflow:hidden;max-width:100%;min-width:0}
 .trow-km .num{font-family:var(--mono);font-weight:700;color:var(--amber);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:clamp(9.5px,3vw,12px)}
 .trow-km .unit{font-size:8.5px;color:var(--tx3);white-space:nowrap}
@@ -127,7 +130,8 @@ input::placeholder{color:var(--tx3)}
 }
 @media (max-width:360px){
   .tbl-head,.trow{grid-template-columns:16px 1fr 36px 50px 18px;gap:4px;padding:8px 7px}
-  .trow-user{font-size:9.5px}
+  .trow-user b{font-size:10.5px}
+  .trow-user .plate-tag{font-size:8.5px}
 }
 
 .card-actions{display:flex;border-top:1px solid var(--line)}
@@ -645,6 +649,11 @@ function showToast(msg){ const t=document.getElementById('toast'); t.textContent
 function fmtDate(iso){ if(!iso) return '-'; const d=new Date(iso+'T00:00:00'); return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear(); }
 function fmtDateShort(iso){ if(!iso) return ''; const d=new Date(iso+'T00:00:00'); const p=n=>String(n).padStart(2,'0'); return p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+String(d.getFullYear()).slice(-2); }
 function plateDisplay(p){ if(!p) return ''; return PLATES[p] || p; } // รองรับทะเบียนที่พิมพ์เอง (ไม่ใช่ A/B)
+function photoUrl(path){
+  if(!path) return '';
+  if(/^https?:\/\//.test(path) || path.startsWith('data:')) return path; // เต็มอยู่แล้ว หรือเป็น data URL (โหมดตัวอย่าง)
+  return CONFIG.API_URL + path; // path สั้นจาก backend เช่น /uploads/202608/xxx.jpg ต้องเติมโดเมนของ API ให้
+}
 function monthKey(iso){ return iso ? iso.slice(0,7) : ''; }
 function monthLabel(mk){ if(!mk) return ''; const [y,m]=mk.split('-').map(Number); return THAI_MONTHS[m-1]+' '+(y+543); }
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -819,7 +828,7 @@ function render(){
             <div class="trow-dest-sub">${mRange}${dist?` · รวม ${dist.toLocaleString()} กม.`:''}</div>
           </span>
           <span class="trow-brand">${escapeHtml(t.Brand||'-')}</span>
-          <span class="trow-user">${escapeHtml(t.UserOut||'-')}</span>
+          <span class="trow-user"><b>${escapeHtml(t.UserOut||'-')}</b><span class="plate-tag">${escapeHtml(plateDisplay(t.Plate)||'-')}</span></span>
           <span class="trow-km">${dist ? `<span class="num">${dist.toLocaleString()}</span><span class="unit">กม.</span>` : '<span class="num">-</span>'}</span>
           <button class="trow-del" title="ลบทริปนี้"><svg class="ic" viewBox="0 0 24 24">${ic('trash')}</svg></button>
         </div>`;
@@ -1203,7 +1212,7 @@ async function openDetail(id){
   if(trip.InDate) html += `<div class="detail-row"><span>วันที่กลับ / ผู้คืนรถ</span><span>${fmtDate(trip.InDate)} · ${escapeHtml(trip.UserIn||'-')}</span></div>`;
 
   if(trip.PhotoStart){
-    html += `<div class="detail-photo-block"><label>รูปเลขไมค์ก่อนออกเดินทาง</label><img class="photo-thumb" src="${trip.PhotoStart}"></div>`;
+    html += `<div class="detail-photo-block"><label>รูปเลขไมค์ก่อนออกเดินทาง</label><img class="photo-thumb" src="${photoUrl(trip.PhotoStart)}"></div>`;
   }
   if(stops.length){
     html += `<div class="detail-photo-block"><label>จุดแวะระหว่างทาง (${stops.length})</label>`;
@@ -1214,13 +1223,13 @@ async function openDetail(id){
           <button class="stop-del" data-stopid="${s.ID}"><svg class="ic" viewBox="0 0 24 24">${ic('trash')}</svg>ลบ</button>
         </div>
         <div class="stop-card-dest">${escapeHtml(sLabel||'-')}</div>
-        ${s.Photo?`<img class="photo-thumb" src="${s.Photo}" style="max-height:120px">`:''}
+        ${s.Photo?`<img class="photo-thumb" src="${photoUrl(s.Photo)}" style="max-height:120px">`:''}
       </div>`;
     });
     html += `</div>`;
   }
   if(trip.PhotoEnd){
-    html += `<div class="detail-photo-block"><label>รูปยืนยันปลายทาง</label><img class="photo-thumb" src="${trip.PhotoEnd}"></div>`;
+    html += `<div class="detail-photo-block"><label>รูปยืนยันปลายทาง</label><img class="photo-thumb" src="${photoUrl(trip.PhotoEnd)}"></div>`;
   }
 
   body.innerHTML = html;
