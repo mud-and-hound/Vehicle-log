@@ -222,6 +222,14 @@ input::placeholder{color:var(--tx3)}
 .camera-side-btn{width:46px;height:46px;border-radius:50%;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .camera-side-btn .ic{width:20px;height:20px}
 .camera-hint{position:absolute;left:0;right:0;top:calc(16px + env(safe-area-inset-top, 0px));color:#fff;font-size:12.5px;text-align:center;padding:8px 20px;text-shadow:0 1px 4px rgba(0,0,0,.8);z-index:2}
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:9px}
+.photo-grid:empty{display:none}
+.photo-cell{position:relative;aspect-ratio:1;border-radius:var(--r3);overflow:hidden;border:1px solid var(--line)}
+.photo-cell img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-cell .rm{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;line-height:1}
+.photo-cell .rm .ic{width:11px;height:11px}
+.photo-count{font-size:11px;color:var(--tx3);margin-top:6px;display:block}
+
 .lightbox{align-items:center;justify-content:center;background:rgba(0,0,0,.92)}
 .lightbox img{max-width:100%;max-height:88dvh;object-fit:contain}
 .lightbox-close{position:absolute;top:calc(16px + env(safe-area-inset-top, 0px));right:16px}
@@ -537,7 +545,7 @@ input::placeholder{color:var(--tx3)}
     <div class="field">
       <label id="stop_photoLabel">ถ่ายรูปยืนยันว่าถึงหน้างานแล้ว</label>
       <button type="button" class="photo-btn" id="stop_photoBtn"><svg class="ic"></svg>ถ่ายรูปหน้างาน</button>
-      <img id="stop_photoPreview" class="photo-thumb" style="display:none">
+      <div id="stop_photoGrid" class="photo-grid"></div>
       <div class="gps-tag" id="stop_gpsTag" style="display:none"><svg class="ic"></svg>บันทึกพิกัดแล้ว</div>
     </div>
     <div class="sheet-actions">
@@ -684,6 +692,12 @@ function fmtDate(iso){ if(!iso) return '-'; const d=new Date(iso+'T00:00:00'); r
 function fmtTime(iso){ if(!iso) return ''; const d=new Date(iso.replace(' ','T')); if(isNaN(d)) return ''; const p=n=>String(n).padStart(2,'0'); return p(d.getHours())+':'+p(d.getMinutes())+' น.'; }
 function fmtDateShort(iso){ if(!iso) return ''; const d=new Date(iso+'T00:00:00'); const p=n=>String(n).padStart(2,'0'); return p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+String(d.getFullYear()).slice(-2); }
 function plateDisplay(p){ if(!p) return ''; return PLATES[p] || p; } // รองรับทะเบียนที่พิมพ์เอง (ไม่ใช่ A/B)
+function photoGridHTML(list){
+  const arr = (list||[]).filter(Boolean);
+  if(arr.length===0) return '';
+  if(arr.length===1) return `<img class="photo-thumb zoomable" src="${photoUrl(arr[0])}" style="max-height:140px" onclick="openLightbox(this.src)">`;
+  return `<div class="photo-grid">${arr.map(p=>`<div class="photo-cell"><img src="${photoUrl(p)}" onclick="openLightbox(this.src)"></div>`).join('')}</div>`;
+}
 function photoUrl(path){
   if(!path) return '';
   if(/^https?:\/\//.test(path) || path.startsWith('data:')) return path; // เต็มอยู่แล้ว หรือเป็น data URL (โหมดตัวอย่าง)
@@ -1155,7 +1169,27 @@ async function confirmStartTrip(){
 /* ============================================================
    จุดแวะ / จบทริป (ฟอร์มร่วมกัน)
    ============================================================ */
-let stopMode = 'add', stopTripId = null, stopPhotoDataUrl = null, stopGps = '', stopFormBrand = 'GD';
+const MAX_STOP_PHOTOS = 5;
+let stopMode = 'add', stopTripId = null, stopPhotos = [], stopGps = '', stopFormBrand = 'GD';
+function renderStopPhotos(){
+  const grid = document.getElementById('stop_photoGrid');
+  grid.innerHTML = stopPhotos.map((src,i)=>`
+    <div class="photo-cell">
+      <img src="${src}" onclick="openLightbox(this.src)">
+      <button type="button" class="rm" data-i="${i}"><svg class="ic" viewBox="0 0 24 24">${ic('close')}</svg></button>
+    </div>`).join('');
+  grid.querySelectorAll('.rm').forEach(b=>{
+    b.onclick = (e)=>{ e.stopPropagation(); stopPhotos.splice(Number(b.dataset.i),1); renderStopPhotos(); };
+  });
+  const btn = document.getElementById('stop_photoBtn');
+  const full = stopPhotos.length >= MAX_STOP_PHOTOS;
+  btn.classList.toggle('has-photo', stopPhotos.length>0);
+  btn.disabled = full;
+  btn.style.opacity = full ? '.5' : '';
+  btn.innerHTML = stopPhotos.length===0
+    ? `<svg class="ic" viewBox="0 0 24 24">${ic('camera')}</svg>ถ่ายรูปหน้างาน`
+    : `<svg class="ic" viewBox="0 0 24 24">${ic('camera')}</svg>${full?`ครบ ${MAX_STOP_PHOTOS} รูปแล้ว`:`ถ่ายเพิ่ม (${stopPhotos.length}/${MAX_STOP_PHOTOS})`}`;
+}
 function setStopBrand(b){
   stopFormBrand = b;
   document.querySelectorAll('#stopBrandTabs button').forEach(x=>x.classList.toggle('active', x.dataset.brand===b));
@@ -1164,7 +1198,7 @@ function setStopBrand(b){
 }
 function openStopSheet(tripId, mode){
   stopMode = mode; stopTripId = tripId;
-  stopPhotoDataUrl = null; stopGps = '';
+  stopPhotos = []; stopGps = '';
   document.getElementById('stopTitle').textContent = mode==='finish' ? 'จบทริป — ปลายทางสุดท้าย' : 'เพิ่มจุดแวะ';
   document.getElementById('stop_photoLabel').textContent = mode==='finish' ? 'ถ่ายรูปยืนยันว่าจบงานแล้ว' : 'ถ่ายรูปยืนยันว่าถึงหน้างานแล้ว';
   document.getElementById('stop_userInField').style.display = mode==='finish' ? 'block' : 'none';
@@ -1172,9 +1206,7 @@ function openStopSheet(tripId, mode){
   document.getElementById('stop_purposeDetail').value = '';
   document.getElementById('stop_mileage').value = '';
   document.getElementById('stop_userIn').value = '';
-  document.getElementById('stop_photoPreview').style.display = 'none';
-  document.getElementById('stop_photoBtn').classList.remove('has-photo');
-  document.getElementById('stop_photoBtn').innerHTML = `<svg class="ic" viewBox="0 0 24 24">${ic('camera')}</svg>ถ่ายรูปหน้างาน`;
+  renderStopPhotos();
   document.getElementById('stop_gpsTag').style.display = 'none';
   purposeChipsRender('', 'stopPurposeChips');
   setStopBrand('GD');
@@ -1202,13 +1234,12 @@ async function loadPreviousPointInfo(tripId){
   box.style.display = 'flex';
 }
 async function stopTakePhoto(){
-  const photo = await openCamera(stopMode==='finish' ? 'ถ่ายรูปยืนยันว่าจบงานที่นี่แล้ว' : 'ถ่ายรูปยืนยันว่าถึงหน้างานแล้ว');
+  if(stopPhotos.length >= MAX_STOP_PHOTOS){ showToast(`ถ่ายได้สูงสุด ${MAX_STOP_PHOTOS} รูป`); return; }
+  const hint = stopMode==='finish' ? 'ถ่ายรูปยืนยันว่าจบงานที่นี่แล้ว' : 'ถ่ายรูปยืนยันว่าถึงหน้างานแล้ว';
+  const photo = await openCamera(`${hint} (${stopPhotos.length+1}/${MAX_STOP_PHOTOS})`);
   if(!photo) return;
-  stopPhotoDataUrl = photo;
-  document.getElementById('stop_photoPreview').src = photo;
-  document.getElementById('stop_photoPreview').style.display = 'block';
-  document.getElementById('stop_photoBtn').classList.add('has-photo');
-  document.getElementById('stop_photoBtn').innerHTML = `<svg class="ic" viewBox="0 0 24 24">${ic('check')}</svg>ถ่ายใหม่อีกครั้ง`;
+  stopPhotos.push(photo);
+  renderStopPhotos();
   getGps().then(g=>{ stopGps = g; if(g) document.getElementById('stop_gpsTag').style.display='inline-flex'; });
 }
 async function confirmStop(){
@@ -1217,18 +1248,25 @@ async function confirmStop(){
   const destName = branch ? branch.name : destRaw;
   const mileage = document.getElementById('stop_mileage').value;
   if(!destName || mileage===''){ showToast('กรอกปลายทางและเลขไมค์ให้ครบก่อนนะ'); return; }
-  if(!stopPhotoDataUrl){ showToast('ถ่ายรูปยืนยันก่อนนะ'); return; }
+  if(stopPhotos.length===0){ showToast('ถ่ายรูปยืนยันอย่างน้อย 1 รูปก่อนนะ'); return; }
   if(stopMode==='finish' && !document.getElementById('stop_userIn').value.trim()){ showToast('กรอกชื่อผู้คืนรถก่อนนะ'); return; }
 
   const btn = document.getElementById('stop_confirmBtn');
   const orig = btn.innerHTML;
   btn.disabled = true; btn.innerHTML = '<span class="spin-sm"></span> กำลังบันทึก...';
   try{
-    const photoUrl = await uploadPhotoDataUrl(stopPhotoDataUrl);
+    btn.innerHTML = `<span class="spin-sm"></span> กำลังอัปโหลดรูป (0/${stopPhotos.length})...`;
+    const photoUrls = [];
+    for(let i=0;i<stopPhotos.length;i++){
+      photoUrls.push(await uploadPhotoDataUrl(stopPhotos[i]));
+      btn.innerHTML = `<span class="spin-sm"></span> กำลังอัปโหลดรูป (${i+1}/${stopPhotos.length})...`;
+    }
+    btn.innerHTML = '<span class="spin-sm"></span> กำลังบันทึก...';
+    const photoUrl = photoUrls[0] || '';
     const base = {
       Brand: stopFormBrand, DestCode: branch?branch.code:'', DestName: destName,
       PurposeType: getSelectedPurpose('stopPurposeChips'), PurposeDetail: document.getElementById('stop_purposeDetail').value.trim(),
-      Mileage: Number(mileage), Photo: photoUrl, Gps: stopGps,
+      Mileage: Number(mileage), Photo: photoUrl, Photos: photoUrls, Gps: stopGps,
     };
     if(isDemo){
       const t = trips.find(x=>x.ID===stopTripId);
@@ -1236,7 +1274,7 @@ async function confirmStop(){
         t.MileageEnd = Number(mileage);
         if(stopMode==='finish'){
           Object.assign(t, {Brand:base.Brand, DestCode:base.DestCode, DestName:base.DestName, PurposeType:base.PurposeType,
-            PurposeDetail:base.PurposeDetail, PhotoEnd:photoUrl, GpsEnd:stopGps, Status:'completed',
+            PurposeDetail:base.PurposeDetail, PhotoEnd:photoUrl, PhotosEnd:photoUrls, GpsEnd:stopGps, Status:'completed',
             InDate:new Date().toISOString().slice(0,10), UserIn:document.getElementById('stop_userIn').value.trim()});
         }
       }
@@ -1313,7 +1351,7 @@ async function openDetail(id){
         <button class="stop-del" data-stopid="${s.ID}"><svg class="ic" viewBox="0 0 24 24">${ic('trash')}</svg>ลบ</button>
       </div>
       <div class="stop-card-dest">${escapeHtml(sLabel||'-')}${s.PurposeType?` · ${escapeHtml(s.PurposeType)}`:''} <span class="mono" style="color:var(--tx3);font-size:11px">(ไมค์ ${s.Mileage??'-'})</span></div>
-      ${s.Photo?`<img class="photo-thumb zoomable" src="${photoUrl(s.Photo)}" style="max-height:120px" onclick="openLightbox(this.src)">`:''}
+      ${photoGridHTML(s.Photos && s.Photos.length ? s.Photos : (s.Photo?[s.Photo]:[]))}
     </div>`;
   });
 
@@ -1321,7 +1359,7 @@ async function openDetail(id){
     html += `<div class="stop-card">
       <div class="stop-card-top"><span><svg class="ic" viewBox="0 0 24 24" style="width:12px;height:12px;color:#c0392b">${ic('finish-flag')}</svg> ${trip.UpdatedAt?fmtTime(trip.UpdatedAt)+' · ':''}${fmtDate(trip.InDate)}</span></div>
       <div class="stop-card-dest">${escapeHtml(destLabel||'-')} <span class="mono" style="color:var(--tx3);font-size:11px">(ไมค์ ${trip.MileageEnd??'-'})</span></div>
-      ${trip.PhotoEnd?`<img class="photo-thumb zoomable" src="${photoUrl(trip.PhotoEnd)}" onclick="openLightbox(this.src)">`:''}
+      ${photoGridHTML(trip.PhotosEnd && trip.PhotosEnd.length ? trip.PhotosEnd : (trip.PhotoEnd?[trip.PhotoEnd]:[]))}
       <div style="font-size:11px;color:var(--tx3);margin-top:6px;display:flex;align-items:center;gap:4px"><svg class="ic" viewBox="0 0 24 24" style="width:11px;height:11px">${ic('circle-user')}</svg>${escapeHtml(trip.UserIn||'-')}</div>
     </div>`;
   }
