@@ -1,73 +1,133 @@
 # บันทึกการใช้รถ IT Department
 
-ระบบบันทึกการใช้รถของแผนก IT (Dunkin' / Greyhound Cafe / Au Bon Pain) เก็บข้อมูลลง Google Sheet ผ่าน Google Apps Script ไม่มีฐานข้อมูลแยก ไม่มีค่าใช้จ่ายเซิร์ฟเวอร์
+ระบบบันทึกการใช้รถของแผนก IT (Dunkin' / Greyhound Cafe / Au Bon Pain / Funky Fries) หน้าเว็บอยู่บน GitHub Pages ส่วนข้อมูลเก็บใน MySQL ผ่าน API (FastAPI) ที่รันบนเซิร์ฟเวอร์ของบริษัท
 
 ## 🔗 ลิงก์หลัก
 
 | อะไร | ลิงก์ |
 |---|---|
 | **เว็บใช้งานจริง** | https://mud-and-hound.github.io/Vehicle-log/ |
-| **Google Sheet (ฐานข้อมูล)** | https://docs.google.com/spreadsheets/d/1I1tVPer5YsHxGbx4hWjpGg2MlAAf_INVz6qBEbIaDrQ/edit |
-| **Google Apps Script (Backend)** | https://script.google.com/u/0/home/projects/1qzBxZgbwHJXJBwiXGZEvj4FS2nwQ1gJ5WiKWLqvmqcGuFkxu5tZ5tNOF/edit |
+| **API (Backend)** | https://vehiclelog.mobile1234.site — เช็กว่าทำงานอยู่ไหมที่ [`/health`](https://vehiclelog.mobile1234.site/health) |
+
+## 🏗 ภาพรวมระบบ
+
+```
+มือถือ / คอม
+   │  เปิดหน้าเว็บ
+   ▼
+GitHub Pages ── ไฟล์ HTML ใน repo นี้
+   │  fetch (JSON)
+   ▼
+vehiclelog.mobile1234.site ── Cloudflare Tunnel
+   │
+   ▼
+FastAPI บนเซิร์ฟเวอร์บริษัท ──► MySQL (database: vehicle_log)
+   └─ รูปถ่ายเก็บเป็นไฟล์ในโฟลเดอร์ uploads/<ปีเดือน>/ บนเซิร์ฟเวอร์
+```
 
 ## 📁 โครงสร้างไฟล์
 
 ```
 Vehicle-log/
-├── index.html               หน้า Landing — เลือกว่าจะเข้าหน้าไหน
-├── vehicle-log-v3.html      บันทึก/แก้ไข/ลบทริป + ดูปฏิทิน + Export CSV
-├── branches-manager.html    เพิ่ม/แก้ไข/ลบ รายชื่อสาขา (GD/GHC/ABP)
-├── Code.gs                  โค้ด Backend (วางใน Google Apps Script)
-├── vehicle-log-database.xlsx  ไฟล์ตั้งต้นสำหรับ import สาขาเข้าชีต (ใช้ครั้งแรกเท่านั้น)
-└── README.md                ไฟล์นี้
+├── index.html               หน้าแรก — เลือกว่าจะเข้าหน้าไหน
+├── vehicle-log-v3.html      บันทึกการใช้รถ: ทริปสด / กรอกย้อนหลัง / ปฏิทิน / Export CSV
+├── branches-manager.html    เพิ่ม/แก้ไข/ลบ รายชื่อสาขา (GD / GHC / ABP / FF)
+└── README.MD                ไฟล์นี้
 ```
 
-ทั้ง 3 หน้าเว็บ (index / vehicle-log-v3 / branches-manager) **ต้องอยู่โฟลเดอร์เดียวกัน** เพราะลิงก์ถึงกันด้วยชื่อไฟล์ตรงๆ (ไม่ใช่ URL เต็ม)
+- ทั้ง 3 หน้า **ต้องอยู่โฟลเดอร์เดียวกัน** เพราะลิงก์ถึงกันด้วยชื่อไฟล์ตรงๆ
+- ที่อยู่ API ตั้งไว้ที่ `CONFIG.API_URL` ใน `vehicle-log-v3.html` และ `branches-manager.html`
+- โค้ด Backend **ไม่ได้อยู่ใน repo นี้** อยู่บนเซิร์ฟเวอร์ที่ `/opt/vehiclelog/main.py`
 
-## 🗂 โครงสร้าง Google Sheet
+## 🗂 ฐานข้อมูล (MySQL: `vehicle_log`)
 
-ต้องมี 2 แท็บชื่อตรงตัวนี้เท่านั้น (ตัวพิมพ์เล็ก-ใหญ่ตรงกัน):
+**trips** — 1 แถว = 1 ทริป
+`id, out_date, user_out, brand, dest_code, dest_name, purpose_type, purpose_detail, in_date, user_in, plate, mileage_start, mileage_end, status, photo_start, photo_end, gps_start, gps_end, created_at, updated_at`
+- `status` = `in_progress` (ทริปสดที่ยังไม่จบ) หรือ `completed`
+- `dest_*` / `purpose_*` ของทริป = ปลายทางสุดท้าย
 
-**Trips** — บันทึกทริปทั้งหมด (ระบบสร้าง/เขียนให้เองอัตโนมัติ ไม่ต้องแก้มือ)
-`ID, OutDate, UserOut, Brand, DestCode, DestName, PurposeType, PurposeDetail, InDate, UserIn, Plate, MileageStart, MileageEnd, CreatedAt, UpdatedAt`
+**trip_stops** — จุดแวะระหว่างทางของทริปสด
+`id, trip_id, seq, brand, dest_code, dest_name, purpose_type, purpose_detail, mileage, photo_path, gps, created_at`
 
-**Branches** — รายชื่อสาขา (แก้ผ่านหน้า `branches-manager.html` ได้เลย ไม่ต้องเข้าชีตเอง)
-`Brand, ShopID, Code, Name`
+**branches** — รายชื่อสาขา (เลขสาขาห้ามซ้ำในแบรนด์เดียวกัน)
+`id, brand, shop_id, code, name`
 
-> ถ้าเปิดชีตแล้วยังไม่มี 2 แท็บนี้ หรือแท็บว่างอยู่ — ไม่ต้องทำอะไร แค่เปิดเว็บใช้งานครั้งแรก ระบบจะสร้างแท็บ + ใส่ข้อมูลสาขาตั้งต้น (971 สาขา) ให้อัตโนมัติ (ดูหัวข้อ "วิธี Deploy" ด้านล่าง)
+## 🔌 API
 
-## ⚙️ วิธี Deploy / อัปเดต Backend (เมื่อแก้ Code.gs)
+| Method | Path | ใช้ทำอะไร |
+|---|---|---|
+| GET | `/trips` | ทริปทั้งหมด |
+| POST | `/trips` | เพิ่มทริป (กรอกย้อนหลัง) |
+| PUT / DELETE | `/trips/{id}` | แก้ไข / ลบทริป |
+| GET | `/trips/{id}/detail` | ทริป + จุดแวะทั้งหมด |
+| GET | `/trips/active` | ทริปสดที่ยังไม่จบ |
+| POST | `/trips/start` | เริ่มทริปสด |
+| GET / POST | `/trips/{id}/stops` | ดู / เพิ่มจุดแวะ |
+| DELETE | `/stops/{id}` | ลบจุดแวะ |
+| POST | `/trips/{id}/finish` | จบทริป |
+| POST | `/uploads` | อัปโหลดรูป (base64 ไม่เกิน 8 MB) ได้ URL กลับมา |
+| GET / POST | `/branches` | ดู / เพิ่มสาขา |
+| PUT / DELETE | `/branches/{id}` | แก้ไข / ลบสาขา |
+| POST | `/branches/bulk` | เพิ่มสาขาหลายรายการ (แถวที่ซ้ำจะข้ามไป) |
+| GET | `/health` | เช็กว่า API ทำงานอยู่ |
 
-1. เปิดลิงก์ Apps Script ด้านบน
-2. ลบโค้ดเดิมทั้งหมด วางโค้ดจาก `Code.gs` ทับ
-3. **Deploy > Manage deployments** → กดไอคอนดินสอ (แก้ไข) ที่ deployment เดิม
-4. ตรง **Version** เลือก **"New version"** (จุดนี้พลาดบ่อยที่สุด — ถ้าไม่เลือก โค้ดที่แก้จะไม่มีผลจริง)
-5. กด **Deploy** (URL จะเหมือนเดิมทุกครั้ง ไม่ต้องแก้ที่หน้าเว็บ)
-6. ทดสอบเปิดลิงก์ `.../exec?action=trips` ตรงๆ ในเบราว์เซอร์ ต้องเห็น `{"ok":true,"data":[...]}`
+ถ้าสำเร็จจะตอบ `{"ok": true, ...}` ถ้าผิดพลาดจะได้ HTTP status 4xx/5xx พร้อมข้อความ error ใน `detail` (หรือ `error` ถ้าเป็น error ที่ backend ไม่ได้ดักไว้)
 
-หน้าเว็บทั้ง 3 หน้าตั้งค่า `CONFIG.APPS_SCRIPT_URL` ไว้แล้วในโค้ด ไม่ต้องแก้อะไรเพิ่มหลัง deploy
+## ⚙️ วิธีอัปเดต
+
+### หน้าเว็บ (ไฟล์ใน repo นี้)
+1. แก้ไฟล์ แล้ว commit + push ขึ้น `main`
+2. GitHub Pages อัปเดตเองภายใน 1–2 นาที ถ้ายังเห็นของเก่า ให้ปิดแท็บแล้วเปิดใหม่ (หรือกดรีเฟรชในแอป LINE)
+3. อยากลองก่อนขึ้นจริง: เปิดไฟล์ในเครื่องโดยแก้ `CONFIG.API_URL` เป็น `''` หน้าเว็บจะเข้า **โหมดตัวอย่าง** ใช้ข้อมูลสาขาที่ฝังไว้ในไฟล์ ไม่ยุ่งกับข้อมูลจริง (**เปลี่ยนกลับก่อน push**)
+
+### Backend (บนเซิร์ฟเวอร์)
+1. แก้ `/opt/vehiclelog/main.py`
+2. `sudo systemctl restart vehiclelog-api`
+3. เปิด https://vehiclelog.mobile1234.site/health ต้องเห็น `{"ok":true,"service":"vehicle-log-api"}`
+4. ถ้าไม่ขึ้น ดู log ด้วย `journalctl -u vehiclelog-api -n 100`
 
 ## 🖥️ วิธีใช้งานแต่ละหน้า
 
 ### 1. บันทึกการใช้รถ (`vehicle-log-v3.html`)
-- กด **+** มุมขวาล่างเพื่อเพิ่มทริป เลือกแบรนด์ปลายทางก่อน (GD/GHC/ABP) แล้วค้นหาสาขาได้ทั้งเลขสาขา/ชื่อย่อ/ชื่อเต็ม
-- เลขไมค์เริ่มต้นจะดึงจากไมค์สิ้นสุดของทริปล่าสุดของรถคันนั้นให้อัตโนมัติ (แก้ไขเองได้)
-- สลับดูเป็น **รายการ** หรือ **ปฏิทิน** ได้ กรองตามรถแต่ละคันได้
-- กดไอคอน 📤 เพื่อ **Export CSV** เลือกช่วงวันที่ ไฟล์ที่ได้มีแค่ วันที่ออก-กลับ / ปลายทาง / ระยะทาง(กม.)
+กดปุ่ม **+** มุมขวาล่าง เลือกได้ 2 แบบ
+- **เริ่มทริปสด (ถ่ายรูปจริง)** — ใส่ชื่อ เลือกรถ ใส่เลขไมค์ ถ่ายรูป (ระบบเก็บพิกัด GPS ให้) → ระหว่างทางกด **เพิ่มจุดแวะ** ได้เรื่อยๆ → ถึงที่สุดท้ายกด **จบทริป** แล้วใส่ชื่อผู้คืนรถ
+  ทริปที่ยังไม่จบจะโชว์เป็นการ์ดด้านบนของหน้า
+- **กรอกข้อมูลย้อนหลัง** — กรอกทริปที่จบไปแล้วในฟอร์มเดียว
+
+**การเลือกปลายทาง:** **แตะช่องสาขา จะเด้งหน้าค้นหาสาขาขึ้นมา** พิมพ์ค้นได้ทันทีด้วยเลขสาขา / ชื่อย่อ / ชื่อเต็ม (พิมพ์หลายคำได้ เช่น `lotus kon`) หรือเลื่อนหาแล้วแตะเลือกก็ได้ เปลี่ยนแบรนด์ในหน้าค้นหาได้เลย เลือกแล้วจะกลับมาที่ฟอร์มพร้อมใส่สาขาให้
+- ค้นไม่เจอในแบรนด์ที่เลือก ระบบจะบอกว่าเจอในแบรนด์ไหนแทน แตะไปดูได้
+- ที่ไปไม่มีในรายการ กด **ใช้ "…" เป็นชื่อปลายทาง** ได้
+- ปุ่ม × ในช่องสาขาใช้ล้างค่า ส่วนปุ่มย้อนกลับของมือถือจะปิดแค่หน้าค้นหา ไม่หลุดออกจากฟอร์ม
+
+อื่นๆ
+- เลขไมค์เริ่มต้นดึงจากไมค์สิ้นสุดของทริปล่าสุดของรถคันนั้นให้อัตโนมัติ (แก้เองได้)
+- สลับดูเป็น **รายการ** หรือ **ปฏิทิน** กรองตามรถแต่ละคันได้ กดที่ทริปเพื่อดูรายละเอียด รูป และเส้นทางจุดแวะ
+- กดไอคอน 📤 เพื่อ **Export CSV** เลือกช่วงวันที่ ไฟล์ที่ได้มี วันที่ออก-กลับ / ปลายทาง / ระยะทาง (กม.)
 
 ### 2. จัดการข้อมูลสาขา (`branches-manager.html`)
-- ค้นหา เพิ่ม แก้ไข ลบ สาขาได้โดยตรง ไม่ต้องเข้า Google Sheet
-- กันเลขสาขาซ้ำกันในแบรนด์เดียวกันให้อัตโนมัติ
+- ค้นหา เพิ่ม แก้ไข ลบ สาขาได้โดยตรง กรองตามแบรนด์ได้
+- กันเลขสาขาซ้ำในแบรนด์เดียวกันให้อัตโนมัติ
 
 ## 🩹 ปัญหาที่เคยเจอ และวิธีแก้ (กันลืม)
 
 | ปัญหา | สาเหตุ | วิธีแก้ที่ใช้ |
 |---|---|---|
-| `Cannot read properties of null (getDataRange)` | สคริปต์เป็น standalone ใช้ `getActiveSpreadsheet()` ไม่ได้ | เปลี่ยนเป็น `SpreadsheetApp.openById(SHEET_ID)` |
-| `Illegal spreadsheet id or key` | ยังไม่ได้ใส่ `SHEET_ID` จริงใน `Code.gs` | คัดลอก ID จาก URL ชีต (ช่วงระหว่าง `/d/` กับ `/edit`) |
-| กรอกเดือน 7 แต่ข้อมูลลงเดือน 6 | Google Sheets แปลง string วันที่เป็น Date object เอง แล้ว JSON.stringify แปลงเป็น UTC เลื่อนวันผิด (timezone ไทย +7) | ล็อกคอลัมน์ OutDate/InDate เป็น plain text + format กลับด้วย timezone ของชีตเองตอนอ่าน |
+| มือถือแตะช่องสาขาแล้วไม่ขึ้นรายการ ต้องพิมพ์ก่อน หรือรายการเด้งทับฟอร์มแล้วหายไปตอนคีย์บอร์ดขึ้น | เดิมใช้ `<datalist>` ของเบราว์เซอร์ ซึ่งแต่ละมือถือ/แอป (Chrome, Samsung, LINE, iPhone) แสดงไม่เหมือนกัน | เปลี่ยนเป็นแตะช่องแล้วเปิดป๊อปอัพค้นหาเต็มจอ (`openBranchPicker`) ช่องค้นหาอยู่บนสุด และป๊อปอัพหดพอดีเหนือคีย์บอร์ด จึงไม่โดนบังทุกรุ่น |
 | ช่องวันที่โชว์ "1 Jul **BE** 2569" ตัวใหญ่ล้นช่อง (iOS) | `<input type="date">` เป็น native widget ของ OS โชว์ตามปฏิทิน/locale ที่ตั้งในเครื่อง CSS ปรับไม่ได้ | เปลี่ยนเป็น custom select วัน/เดือน/ปี (ค.ศ. ล้วน) ที่คุมเองทั้งหมด |
 | เลขไมค์ล้นขอบจอมือถือจอเล็ก (iPhone SE) | CSS Grid ไม่มี `min-width:0` ทำให้ cell ไม่ยอมหด | เพิ่ม `min-width:0` + `overflow:hidden` ทุกระดับ + font-size แบบ `clamp()` |
+| เบราว์เซอร์ขึ้น "CORS blocked" ทั้งที่จริงๆ API error | exception ที่หลุดจาก endpoint ทำให้ response ไม่มี CORS header | Backend ดักทุก exception แล้วใส่ CORS header เอง พร้อมส่งข้อความ error จริงกลับมา |
+| กรอกเดือน 7 แต่ข้อมูลลงเดือน 6 (สมัยใช้ Google Sheet) | Google Sheets แปลงวันที่เป็น Date object แล้ว JSON แปลงเป็น UTC เลื่อนวันผิด (ไทย +7) | ล็อกคอลัมน์วันที่เป็น plain text ปัจจุบันเก็บใน MySQL เป็นวันที่ตรงๆ แล้ว |
+
+## 🕘 ประวัติ
+
+| เมื่อไหร่ | เปลี่ยนอะไร |
+|---|---|
+| ก.ค. 2026 | เริ่มระบบ ใช้ Google Sheet + Google Apps Script เป็นฐานข้อมูล |
+| 13 ส.ค. 2026 | ย้ายไปใช้ FastAPI + MySQL บนเซิร์ฟเวอร์บริษัท |
+| 27 ส.ค. 2026 | เพิ่มทริปสด (เริ่ม → จุดแวะ → จบ) พร้อมรูปถ่ายและพิกัด GPS |
+| ต.ค. 2026 | เปลี่ยนการเลือกสาขาเป็นป๊อปอัพค้นหา ใช้บนมือถือได้ทุกรุ่น |
+
+Google Sheet เดิมเก็บไว้ดูย้อนหลังเท่านั้น ไม่ได้ใช้แล้ว: https://docs.google.com/spreadsheets/d/1I1tVPer5YsHxGbx4hWjpGg2MlAAf_INVz6qBEbIaDrQ/edit
 
 ## 🎨 ดีไซน์
 
