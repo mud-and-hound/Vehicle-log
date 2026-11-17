@@ -356,7 +356,7 @@ input::placeholder{color:var(--tx3)}
   <div class="row-between">
     <div class="plate-row" id="plateSeg" style="flex:1">
       <button class="pchip active" data-plate="ALL"><svg class="ic"></svg>ทุกคัน</button>
-      <button class="pchip" data-plate="A"><svg class="ic"></svg>3ฒ-7643</button>
+      <button class="pchip" data-plate="A"><svg class="ic"></svg>3ฒษ-7643</button>
       <button class="pchip" data-plate="B"><svg class="ic"></svg>3ฒภ-8066</button>
     </div>
     <button id="exportBtn" title="Export ข้อมูล" style="flex-shrink:0;width:38px;height:38px;border-radius:9px;background:var(--panel);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--tx2)"><svg class="ic" style="width:16px;height:16px"></svg></button>
@@ -421,7 +421,7 @@ input::placeholder{color:var(--tx3)}
       <div class="field">
         <label>ทะเบียนรถ</label>
         <div class="plate-pick" id="platePick">
-          <div class="plate-opt" data-plate="A"><svg class="ic"></svg>3ฒ-7643</div>
+          <div class="plate-opt" data-plate="A"><svg class="ic"></svg>3ฒษ-7643</div>
           <div class="plate-opt" data-plate="B"><svg class="ic"></svg>3ฒภ-8066</div>
           <div class="plate-opt" data-plate="OTHER"><svg class="ic"></svg>อื่นๆ</div>
         </div>
@@ -534,7 +534,7 @@ input::placeholder{color:var(--tx3)}
       <div class="field">
         <label>ทะเบียนรถ</label>
         <select id="st_plate">
-          <option value="A">3ฒ-7643</option>
+          <option value="A">3ฒษ-7643</option>
           <option value="B">3ฒภ-8066</option>
         </select>
       </div>
@@ -657,7 +657,7 @@ function paintIcon(el, name){ el.innerHTML = ic(name); el.setAttribute('viewBox'
 /* ====== ตั้งค่าการเชื่อมต่อ ====== */
 const CONFIG = { API_URL: 'https://vehiclelog.mobile1234.site' };
 
-const PLATES = { A: '3ฒ-7643', B: '3ฒภ-8066' };
+const PLATES = { A: '3ฒษ-7643', B: '3ฒภ-8066' };
 const PURPOSES = ['เปิดร้าน','ปิดร้าน','ซ่อมบำรุง','เก็บอุปกรณ์','ติดตั้ง/เปลี่ยนอุปกรณ์ POS','ตรวจเช็คระบบ','ประชุม/อบรม','อื่นๆ'];
 const THAI_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
 const THAI_MONTHS_SHORT = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
