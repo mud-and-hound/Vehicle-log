@@ -38,9 +38,11 @@ input::placeholder{color:var(--tx3)}
 .hero{background:var(--panel);padding:18px 18px 14px;border-bottom:1px solid var(--line)}
 .eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;color:var(--tx3);text-transform:uppercase;display:flex;align-items:center;gap:6px}
 .eyebrow .ic{width:12px;height:12px}
-.hero h1{font-size:19px;font-weight:600;margin:6px 0 2px}
+.hero h1{font-size:19px;font-weight:600;margin:6px 48px 2px 0} /* เว้นขวาให้ปุ่มความคิดเห็น (feedback.js) */
 .back-link{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--tx2);margin-top:8px;text-decoration:none}
 .back-link .ic{width:12px;height:12px;transform:rotate(180deg)}
+.report-link{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--amber);font-weight:500;margin:8px 0 0 14px;text-decoration:none}
+.report-link .ic{width:13px;height:13px}
 .demo-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--amber);background:rgba(255,176,32,.08);border:1px solid rgba(255,176,32,.3);padding:3px 9px;border-radius:var(--r3);margin-top:6px}
 .demo-badge .ic{width:11px;height:11px}
 
@@ -311,6 +313,10 @@ input::placeholder{color:var(--tx3)}
 .stop-card-dest{font-size:13px;font-weight:500;color:var(--tx)}
 .stop-del{color:var(--bad);font-size:11px;display:flex;align-items:center;gap:3px}
 .stop-del .ic{width:11px;height:11px}
+.stop-btns{display:flex;align-items:center;gap:12px}
+.stop-edit{color:var(--tx2);font-size:11px;display:flex;align-items:center;gap:3px}
+.stop-edit .ic{width:11px;height:11px}
+.btn-del{background:var(--panel);color:var(--bad);border:1px solid var(--line)}
 .detail-actions{display:flex;gap:10px;margin-top:16px}
 .detail-actions button{flex:1;padding:12px;border-radius:var(--r3);font-size:13.5px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px}
 .detail-actions .ic{width:14px;height:14px}
@@ -326,6 +332,7 @@ input::placeholder{color:var(--tx3)}
   <div class="eyebrow"><svg class="ic"></svg>IT DEPARTMENT · FLEET LOG</div>
   <h1>บันทึกการใช้รถ IT Department</h1>
   <a href="index.html" class="back-link"><svg class="ic"></svg>กลับหน้าหลัก</a>
+  <a href="vehicle-report.html" class="report-link" title="ใช้รถคันไหน กี่กิโลต่อปี/เดือน มากสุด น้อยสุด เฉลี่ยต่อวัน และตรวจข้อมูลผิดปกติ"><svg class="ic" id="icReport"></svg>สรุปการใช้รถรายปี</a>
   <span class="demo-badge" id="modeBadge"><svg class="ic"></svg>โหมดตัวอย่าง — ยังไม่เชื่อมฐานข้อมูล</span>
   <div class="stat-row stat-loading" id="statRow">
     <div class="stat"><div class="si"><svg class="ic" id="statIc1"></svg></div><div class="v mono" id="odoTrips">0</div><div class="l">เที่ยวเดือนนี้</div></div>
@@ -581,7 +588,7 @@ input::placeholder{color:var(--tx3)}
       <label>ผู้คืนรถ</label>
       <input type="text" id="stop_userIn" placeholder="ชื่อ">
     </div>
-    <div class="field">
+    <div class="field" id="stop_photoField">
       <label id="stop_photoLabel">ถ่ายรูปยืนยันว่าถึงหน้างานแล้ว</label>
       <button type="button" class="photo-btn" id="stop_photoBtn"><svg class="ic"></svg>ถ่ายรูปหน้างาน</button>
       <div id="stop_photoGrid" class="photo-grid"></div>
@@ -602,6 +609,7 @@ input::placeholder{color:var(--tx3)}
     <div id="detailBody"></div>
     <div class="detail-actions">
       <button type="button" class="btn-cancel" id="detail_closeBtn"><svg class="ic"></svg>ปิด</button>
+      <button type="button" class="btn-del" id="detail_delBtn"><svg class="ic"></svg>ลบทริป</button>
       <button type="button" class="btn-save" id="detail_editBtn"><svg class="ic"></svg>แก้ไข</button>
     </div>
   </div>
@@ -1102,19 +1110,25 @@ function render(){
   });
 }
 
+// ลบทริป (ใช้ทั้งปุ่มถังขยะในตาราง และปุ่ม "ลบทริป" ในหน้ารายละเอียด ซึ่งลบทริปที่ยังไม่จบได้ด้วย) — คืนค่า true ถ้าลบสำเร็จ
 async function deleteTrip(id, btnEl){
-  const t = trips.find(x=>x.ID===id);
-  if(!confirm('ลบทริปไปที่ "' + (t ? t.DestName : '') + '" ใช่ไหม? กู้คืนไม่ได้')) return;
+  const t = trips.find(x=>x.ID===id) || activeTrips.find(x=>x.ID===id);
+  const label = t ? (t.DestName ? `ทริปไปที่ "${t.DestName}"` : `ทริป #${t.ID} (${plateDisplay(t.Plate)||'-'} · ${fmtDate(t.OutDate)}${t.Status==='in_progress'?' · ยังไม่จบ':''})`) : `ทริป #${id}`;
+  if(!confirm(`ลบ${label} ใช่ไหม?\nจุดแวะและข้อมูลของทริปนี้จะถูกลบทั้งหมด กู้คืนไม่ได้`)) return false;
   const original = btnEl ? btnEl.innerHTML : '';
   if(btnEl){ btnEl.disabled = true; btnEl.innerHTML = '<span class="spin-sm"></span> กำลังลบ...'; }
   try{
     await apiDelete(id);
     trips = await apiGetTrips();
+    await loadActiveTrips();
     render();
-    showToast('ลบทริปไปที่ "' + (t ? t.DestName : '') + '" ออกจากระบบแล้ว');
+    showToast(`ลบ${label}ออกจากระบบแล้ว`);
+    if(btnEl){ btnEl.disabled = false; btnEl.innerHTML = original; }
+    return true;
   }catch(err){
     showToast('ลบไม่สำเร็จ เช็คการเชื่อมต่อแล้วลองใหม่');
     if(btnEl){ btnEl.disabled = false; btnEl.innerHTML = original; }
+    return false;
   }
 }
 
@@ -1362,7 +1376,7 @@ async function confirmStartTrip(){
    จุดแวะ / จบทริป (ฟอร์มร่วมกัน)
    ============================================================ */
 const MAX_STOP_PHOTOS = 5;
-let stopMode = 'add', stopTripId = null, stopPhotos = [], stopGps = '', stopFormBrand = 'GD';
+let stopMode = 'add', stopTripId = null, stopPhotos = [], stopGps = '', stopFormBrand = 'GD', stopEditing = null;
 function renderStopPhotos(){
   const grid = document.getElementById('stop_photoGrid');
   grid.innerHTML = stopPhotos.map((src,i)=>`
@@ -1387,11 +1401,13 @@ function setStopBrand(b){
   document.querySelectorAll('#stopBrandTabs button').forEach(x=>x.classList.toggle('active', x.dataset.brand===b));
   document.getElementById('stop_dest').value = '';
 }
-function openStopSheet(tripId, mode){
-  stopMode = mode; stopTripId = tripId;
+// mode: 'add' = เพิ่มจุดแวะ / 'finish' = จบทริป / 'edit' = แก้ไขจุดแวะที่บันทึกไปแล้ว (ส่ง stop มาด้วย, ไม่ต้องถ่ายรูปใหม่)
+function openStopSheet(tripId, mode, stop){
+  stopMode = mode; stopTripId = tripId; stopEditing = mode==='edit' ? stop : null;
   stopPhotos = []; stopGps = '';
-  document.getElementById('stopTitle').textContent = mode==='finish' ? 'จบทริป — ปลายทางสุดท้าย' : 'เพิ่มจุดแวะ';
+  document.getElementById('stopTitle').textContent = mode==='finish' ? 'จบทริป — ปลายทางสุดท้าย' : mode==='edit' ? `แก้ไขจุดแวะ #${stop.Seq}` : 'เพิ่มจุดแวะ';
   document.getElementById('stop_photoLabel').textContent = mode==='finish' ? 'ถ่ายรูปยืนยันว่าจบงานแล้ว' : 'ถ่ายรูปยืนยันว่าถึงหน้างานแล้ว';
+  document.getElementById('stop_photoField').style.display = mode==='edit' ? 'none' : '';
   document.getElementById('stop_userInField').style.display = mode==='finish' ? 'block' : 'none';
   document.getElementById('stop_dest').value = '';
   document.getElementById('stop_purposeDetail').value = '';
@@ -1399,10 +1415,20 @@ function openStopSheet(tripId, mode){
   document.getElementById('stop_userIn').value = '';
   renderStopPhotos();
   document.getElementById('stop_gpsTag').style.display = 'none';
-  purposeChipsRender('', 'stopPurposeChips');
-  setStopBrand('GD');
+  if(mode==='edit'){
+    const brand = ['GD','GHC','ABP','FF'].includes(stop.Brand) ? stop.Brand : 'GD';
+    setStopBrand(brand);
+    document.getElementById('stop_dest').value = destDisplayValue(brand, stop.DestCode, stop.DestName);
+    purposeChipsRender(stop.PurposeType||'', 'stopPurposeChips');
+    document.getElementById('stop_purposeDetail').value = stop.PurposeDetail||'';
+    document.getElementById('stop_mileage').value = stop.Mileage ?? '';
+    document.getElementById('stopPrevInfo').style.display = 'none';
+  } else {
+    purposeChipsRender('', 'stopPurposeChips');
+    setStopBrand('GD');
+    loadPreviousPointInfo(tripId);
+  }
   document.getElementById('stopOverlay').classList.add('open');
-  loadPreviousPointInfo(tripId);
 }
 async function loadPreviousPointInfo(tripId){
   const box = document.getElementById('stopPrevInfo');
@@ -1439,6 +1465,7 @@ async function confirmStop(){
   const destName = branch ? branch.name : destRaw;
   const mileage = document.getElementById('stop_mileage').value;
   if(!destName || mileage===''){ showToast('กรอกปลายทางและเลขไมค์ให้ครบก่อนนะ'); return; }
+  if(stopMode==='edit') return saveStopEdit(branch, destName, mileage);
   if(stopPhotos.length===0){ showToast('ถ่ายรูปยืนยันอย่างน้อย 1 รูปก่อนนะ'); return; }
   if(stopMode==='finish' && !document.getElementById('stop_userIn').value.trim()){ showToast('กรอกชื่อผู้คืนรถก่อนนะ'); return; }
 
@@ -1488,10 +1515,35 @@ async function confirmStop(){
   btn.disabled = false; btn.innerHTML = orig;
 }
 
+async function saveStopEdit(branch, destName, mileage){
+  if(isDemo){ showToast('โหมดตัวอย่างไม่รองรับการแก้ไขจุดแวะ'); return; }
+  const btn = document.getElementById('stop_confirmBtn');
+  const orig = btn.innerHTML;
+  btn.disabled = true; btn.innerHTML = '<span class="spin-sm"></span> กำลังบันทึก...';
+  try{
+    const payload = {
+      Brand: stopFormBrand, DestCode: branch?branch.code:'', DestName: destName,
+      PurposeType: getSelectedPurpose('stopPurposeChips'), PurposeDetail: document.getElementById('stop_purposeDetail').value.trim(),
+      Mileage: Number(mileage),
+    };
+    const r = await fetch(CONFIG.API_URL + '/stops/' + stopEditing.ID, {method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+    if(!r.ok) throw new Error('edit stop failed');
+    document.getElementById('stopOverlay').classList.remove('open');
+    await loadActiveTrips();
+    trips = await apiGetTrips();
+    render();
+    showToast(`แก้ไขจุดแวะ #${stopEditing.Seq} แล้ว`);
+    openDetail(stopTripId);   // กลับไปหน้ารายละเอียดทริปเดิม
+  }catch(err){
+    showToast('บันทึกไม่สำเร็จ เช็คการเชื่อมต่อแล้วลองใหม่');
+  }
+  btn.disabled = false; btn.innerHTML = orig;
+}
+
 /* ============================================================
    หน้าดูรายละเอียดทริป
    ============================================================ */
-let detailTripId = null;
+let detailTripId = null, detailStops = [];
 async function openDetail(id){
   detailTripId = id;
   const body = document.getElementById('detailBody');
@@ -1514,6 +1566,7 @@ async function openDetail(id){
     }
   }
   if(!trip){ body.innerHTML = '<div class="empty">ไม่พบข้อมูล</div>'; return; }
+  detailStops = stops;
 
   const dist = (trip.MileageEnd!=null && trip.MileageEnd!=='' && trip.MileageStart!=null && trip.MileageStart!=='' && Number(trip.MileageEnd)>=Number(trip.MileageStart)) ? (Number(trip.MileageEnd)-Number(trip.MileageStart)) : null;
   const destLabel = [trip.DestCode, trip.DestName, trip.PurposeType].filter(Boolean).join(' - ');
@@ -1539,7 +1592,10 @@ async function openDetail(id){
     const sLabel = [s.DestCode, s.DestName].filter(Boolean).join(' - ');
     html += `<div class="stop-card">
       <div class="stop-card-top"><span><svg class="ic" viewBox="0 0 24 24" style="width:12px;height:12px;color:var(--amber)">${ic('location-pin-parking')}</svg> #${s.Seq} ${s.CreatedAt?'· '+fmtTime(s.CreatedAt):''}</span>
-        <button class="stop-del" data-stopid="${s.ID}"><svg class="ic" viewBox="0 0 24 24">${ic('trash')}</svg>ลบ</button>
+        <span class="stop-btns">
+          <button class="stop-edit" data-stopid="${s.ID}"><svg class="ic" viewBox="0 0 24 24">${ic('pencil')}</svg>แก้ไข</button>
+          <button class="stop-del" data-stopid="${s.ID}"><svg class="ic" viewBox="0 0 24 24">${ic('trash')}</svg>ลบ</button>
+        </span>
       </div>
       <div class="stop-card-dest">${escapeHtml(sLabel||'-')}${s.PurposeType?` · ${escapeHtml(s.PurposeType)}`:''} <span class="mono" style="color:var(--tx3);font-size:11px">(ไมค์ ${s.Mileage??'-'})</span></div>
       ${photoGridHTML(s.Photos && s.Photos.length ? s.Photos : (s.Photo?[s.Photo]:[]))}
@@ -1557,14 +1613,29 @@ async function openDetail(id){
   html += `</div>`;
 
   body.innerHTML = html;
+  body.querySelectorAll('.stop-edit').forEach(btn=>{
+    btn.onclick = ()=>{
+      const s = detailStops.find(x=>String(x.ID)===btn.dataset.stopid);
+      if(!s) return;
+      document.getElementById('detailOverlay').classList.remove('open');
+      openStopSheet(id, 'edit', s);
+    };
+  });
   body.querySelectorAll('.stop-del').forEach(btn=>{
     btn.onclick = async ()=>{
-      if(!confirm('ลบจุดแวะนี้ใช่ไหม?')) return;
+      const s = detailStops.find(x=>String(x.ID)===btn.dataset.stopid);
+      if(!confirm(`ลบจุดแวะ #${s?s.Seq:''} ${s&&s.DestName?'"'+s.DestName+'" ':''}ใช่ไหม? กู้คืนไม่ได้`)) return;
       if(isDemo){ showToast('โหมดตัวอย่างไม่รองรับการลบจุดแวะ'); return; }
       try{
-        await fetch(CONFIG.API_URL + '/stops/' + btn.dataset.stopid, {method:'DELETE'});
+        const r = await fetch(CONFIG.API_URL + '/stops/' + btn.dataset.stopid, {method:'DELETE'});
+        if(!r.ok) throw new Error('delete stop failed');
+        // ไมค์ล่าสุดของทริปที่ยังไม่จบอาจเปลี่ยน → โหลดตัวเลขใหม่ด้วย
+        await loadActiveTrips();
+        trips = await apiGetTrips();
+        render();
+        showToast('ลบจุดแวะแล้ว');
         openDetail(id);
-      }catch(e){ showToast('ลบไม่สำเร็จ'); }
+      }catch(e){ showToast('ลบไม่สำเร็จ เช็คการเชื่อมต่อแล้วลองใหม่'); }
     };
   });
 }
@@ -1660,6 +1731,7 @@ function paintAllStaticIcons(){
   paintIcon(document.getElementById('statIc3'), 'car-alt');
   paintIcon(document.querySelector('.eyebrow .ic'), 'car-journey');
   paintIcon(document.querySelector('.back-link .ic'), 'arrow-small-right');
+  paintIcon(document.getElementById('icReport'), 'tachometer-fast');
   paintIcon(document.querySelector('#modeBadge .ic'), 'interrogation');
   paintIcon(document.getElementById('icPrev'), 'arrow-small-left');
   paintIcon(document.getElementById('icNext'), 'arrow-small-right');
@@ -1690,6 +1762,7 @@ function paintAllStaticIcons(){
   paintIcon(document.getElementById('detailTitleIc'), 'car-journey');
   paintIcon(document.querySelector('#detail_closeBtn .ic'), 'close');
   paintIcon(document.querySelector('#detail_editBtn .ic'), 'pencil');
+  paintIcon(document.querySelector('#detail_delBtn .ic'), 'trash');
 }
 
 async function init(){
@@ -1744,13 +1817,18 @@ async function init(){
   document.getElementById('stopBrandTabs').addEventListener('click',(e)=>{ const b=e.target.closest('button'); if(b) setStopBrand(b.dataset.brand); });
   setupDestField('stop_dest', ()=>stopFormBrand, setStopBrand);
   document.getElementById('stop_photoBtn').onclick = stopTakePhoto;
-  document.getElementById('stop_cancelBtn').onclick = ()=>document.getElementById('stopOverlay').classList.remove('open');
+  // ปิดฟอร์มจุดแวะ — ถ้ามาจากการแก้ไขจุดแวะ ให้กลับไปหน้ารายละเอียดทริปเดิม
+  const closeStopSheet = ()=>{ document.getElementById('stopOverlay').classList.remove('open'); if(stopMode==='edit') openDetail(stopTripId); };
+  document.getElementById('stop_cancelBtn').onclick = closeStopSheet;
   document.getElementById('stop_confirmBtn').onclick = confirmStop;
-  document.getElementById('stopOverlay').addEventListener('click',(e)=>{ if(e.target.id==='stopOverlay') e.currentTarget.classList.remove('open'); });
+  document.getElementById('stopOverlay').addEventListener('click',(e)=>{ if(e.target.id==='stopOverlay') closeStopSheet(); });
 
   // หน้าดูรายละเอียด
   document.getElementById('detail_closeBtn').onclick = ()=>document.getElementById('detailOverlay').classList.remove('open');
   document.getElementById('detail_editBtn').onclick = ()=>{ document.getElementById('detailOverlay').classList.remove('open'); openEdit(detailTripId); };
+  document.getElementById('detail_delBtn').onclick = async (e)=>{
+    if(await deleteTrip(detailTripId, e.currentTarget)) document.getElementById('detailOverlay').classList.remove('open');
+  };
   document.getElementById('detailOverlay').addEventListener('click',(e)=>{ if(e.target.id==='detailOverlay') e.currentTarget.classList.remove('open'); });
 
   loadActiveTrips();
@@ -1838,9 +1916,25 @@ async function init(){
     saveBtn.innerHTML = saveBtnOriginal;
     saveBtn.disabled = false;
   });
+
+  openTripFromUrl();
+}
+
+/* ลิงก์ตรงไปที่ทริป (ใช้จากหน้าสรุปรายปี / ตรวจสอบข้อมูล) → เลื่อนไปเดือนนั้นแล้ว
+   vehicle-log-v3.html?trip=123         เปิดหน้ารายละเอียด (มีปุ่ม แก้ไข / ลบทริป / แก้ไข-ลบจุดแวะ)
+   vehicle-log-v3.html?trip=123&edit=1  เปิดฟอร์มแก้ไขทริปเลย */
+function openTripFromUrl(){
+  const qs = new URLSearchParams(location.search), q = qs.get('trip');
+  if(!q) return;
+  try{ history.replaceState(null, '', location.pathname); }catch(e){}
+  const t = trips.find(x=>String(x.ID)===q);
+  if(!t){ showToast('ไม่พบทริป #' + q + ' (อาจถูกลบไปแล้ว)'); return; }
+  if(t.OutDate){ curMonth = monthKey(t.OutDate); selDate = null; render(); }
+  if(qs.get('edit')==='1') openEdit(t.ID); else openDetail(t.ID);
 }
 
 document.addEventListener('DOMContentLoaded', init);
 </script>
+<script src="feedback.js" defer></script>
 </body>
 </html>
