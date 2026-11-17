@@ -16,7 +16,7 @@
   --amber:#8a6a4a; --amber-ink:#ffffff;  /* 10% จุดเดียวที่ดึงสายตา */
   --bad:#b3462b;
   --r1:18px; --r2:14px; --r3:11px;
-  --sans:'Prompt',sans-serif; --mono:'JetBrains Mono',monospace;
+  --sans:'Prompt',sans-serif; --mono:'JetBrains Mono','Prompt',monospace; /* JetBrains Mono ไม่มีอักษรไทย → ทะเบียน/หน่วย กม. ใช้ Prompt แทน */
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--ink);color:var(--tx);font-family:var(--sans);overflow-x:hidden}
@@ -276,6 +276,8 @@ input::placeholder{color:var(--tx3)}
 .photo-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;border-radius:var(--r3);border:1.5px dashed var(--line);background:var(--panel);color:var(--tx2);font-size:13.5px;font-weight:500}
 .photo-btn.has-photo{border-style:solid;border-color:var(--amber);color:var(--amber)}
 .photo-btn .ic{width:16px;height:16px}
+.photo-btn:disabled{opacity:.5;cursor:default}
+.attach-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .gps-tag{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:var(--tx3);margin-top:5px}
 .gps-tag .ic{width:11px;height:11px;color:var(--amber)}
 
@@ -468,6 +470,18 @@ input::placeholder{color:var(--tx3)}
       </div>
       <div class="dist-preview">ระยะทางที่ใช้ <span class="num mono" id="distVal">-</span></div>
 
+      <!-- รูปประกอบทริป: ถ่ายด้วยกล้องในเว็บ หรือเลือกจากคลังรูป / ไฟล์ / Google Drive ในมือถือ (สูงสุด 6 รูป) -->
+      <div class="field" style="margin-top:14px">
+        <label>รูปภาพประกอบ <span style="font-weight:400">— ไม่บังคับ · สูงสุด 6 รูป</span></label>
+        <div class="attach-btns">
+          <button type="button" class="photo-btn" id="f_photoCam"><svg class="ic"></svg>ถ่ายรูป</button>
+          <button type="button" class="photo-btn" id="f_photoPick"><svg class="ic"></svg>เลือกรูป / ไฟล์</button>
+        </div>
+        <input type="file" id="f_photoFile" accept="image/*" multiple hidden>
+        <div id="f_photoGrid" class="photo-grid"></div>
+        <span class="photo-count" id="f_photoNote">เช่น รูปเลขไมค์ตอนออก-กลับ รูปหน้างาน ใบเสร็จ · เลือกได้จากคลังรูป ไฟล์ หรือ Google Drive</span>
+      </div>
+
       <div class="sheet-actions">
         <button type="button" class="btn-cancel" id="cancelBtn"><svg class="ic"></svg>ยกเลิก</button>
         <button type="submit" class="btn-save" id="saveBtn"><svg class="ic"></svg>บันทึก</button>
@@ -648,6 +662,7 @@ function ic(name){
   if(name==='check' && !SVGICONS.check){ SVGICONS.check='<path d="M9.55 17.65 4.9 13l1.4-1.4 3.25 3.25 8.15-8.15L19.1 8l-9.55 9.65Z"/>'; }
   if(name==='file-export' && !SVGICONS['file-export']){ SVGICONS['file-export']='<path d="M18.83,21.77c-.21-.18-.52-.16-.71,.04-.66,.75-1.62,1.19-2.62,1.19H4.5c-1.93,0-3.5-1.57-3.5-3.5V4.5c0-1.93,1.57-3.5,3.5-3.5h5.51c.33,0,.66,.03,.99,.09V6.5c0,1.38,1.12,2.5,2.5,2.5h5.41c.06,.32,.09,.65,.09,.99v.51c0,.28,.22,.5,.5,.5s.5-.22,.5-.5v-.51c0-1.74-.68-3.37-1.9-4.6l-3.48-3.48c-1.23-1.23-2.86-1.9-4.6-1.9H4.5C2.02,0,0,2.02,0,4.5v15c0,2.48,2.02,4.5,4.5,4.5H15.5c1.29,0,2.52-.56,3.38-1.52,.18-.21,.16-.52-.04-.71Zm-1.44-15.67c.55,.55,.97,1.2,1.24,1.9h-5.13c-.83,0-1.5-.67-1.5-1.5V1.37c.71,.27,1.35,.69,1.9,1.24l3.48,3.48Zm6.61,10.41c0,.5-.19,1-.58,1.38l-2.57,2.52c-.1,.09-.22,.14-.35,.14s-.26-.05-.36-.15c-.19-.2-.19-.51,0-.71l2.57-2.51c.06-.06,.1-.12,.14-.18H13.5c-.28,0-.5-.22-.5-.5s.22-.5,.5-.5h9.36c-.04-.07-.09-.13-.15-.19l-2.57-2.51c-.2-.19-.2-.51,0-.71,.19-.2,.51-.2,.71,0l2.57,2.51c.38,.38,.58,.89,.58,1.39,0,0,0,0,0,0s0,0,0,0Z"/>'; }
   if(name==='camera' && !SVGICONS.camera){ SVGICONS.camera='<path d="M9 2a1 1 0 0 0-.8.4L6.75 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2.75L15.8 2.4A1 1 0 0 0 15 2H9Zm3 6a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/>'; }
+  if(name==='image' && !SVGICONS.image){ SVGICONS.image='<path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm0 2v9.6l-3.3-3.3a1 1 0 0 0-1.4 0L9 16.6l-1.8-1.8a1 1 0 0 0-1.4 0L5 15.6V5h14ZM5 19v-.6l1.5-1.5 1.8 1.8a1 1 0 0 0 1.4 0l5.3-5.3L19 17.4V19H5Zm4-9.5A1.5 1.5 0 1 0 9 6.5a1.5 1.5 0 0 0 0 3Z"/>'; }
   if(name==='flag' && !SVGICONS.flag){ SVGICONS.flag='<path d="M5 2a1 1 0 0 1 1 1v18a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1Zm2 1.2h11.3a.5.5 0 0 1 .38.82L15.8 8l2.88 3.98a.5.5 0 0 1-.38.82H7V3.2Z"/>'; }
   if(name==='gps' && !SVGICONS.gps){ SVGICONS.gps='<path d="M12 2a1 1 0 0 1 1 1v1.06A8 8 0 0 1 20.94 11H22a1 1 0 1 1 0 2h-1.06A8 8 0 0 1 13 20.94V22a1 1 0 1 1-2 0v-1.06A8 8 0 0 1 3.06 13H2a1 1 0 1 1 0-2h1.06A8 8 0 0 1 11 3.06V2a1 1 0 0 1 1-1Zm0 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12Zm0 3.5A2.5 2.5 0 1 1 9.5 12 2.5 2.5 0 0 1 12 9.5Z"/>'; }
   return (SVGICONS[name]||'').toString();
@@ -791,15 +806,21 @@ async function apiGetTrips(){
   const j = await r.json();
   return j.ok ? j.data : [];
 }
+// อ่านข้อความ error จริงจาก API (เช่น "ยังไม่มีตาราง ..." / "รูปแนบไม่ถูกต้อง") มาโชว์ให้ผู้ใช้เห็น
+async function apiError(r){
+  let msg = 'เช็คการเชื่อมต่อแล้วลองใหม่';
+  try{ const j = await r.json(); if(typeof j.detail==='string') msg = j.detail; else if(j.detail) msg = 'ข้อมูลบางช่องไม่ถูกต้อง'; else if(j.error) msg = j.error; }catch(e){}
+  return new Error(msg);
+}
 async function apiAdd(payload){
   if(isDemo){ payload.ID = uid(); trips.push(payload); return; }
   const r = await fetch(CONFIG.API_URL + '/trips', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-  if(!r.ok) throw new Error('add failed');
+  if(!r.ok) throw await apiError(r);
 }
 async function apiUpdate(payload){
   if(isDemo){ const i=trips.findIndex(t=>t.ID===payload.ID); if(i>-1) trips[i]={...trips[i],...payload}; return; }
   const r = await fetch(CONFIG.API_URL + '/trips/' + payload.ID, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
-  if(!r.ok) throw new Error('update failed');
+  if(!r.ok) throw await apiError(r);
 }
 async function apiDelete(id){
   if(isDemo){ trips = trips.filter(t=>t.ID!==id); return; }
@@ -1149,6 +1170,7 @@ function openAdd(){
   setPlate('A');
   setFormBrand('GD');
   updateDistPreview();
+  resetFormPhotos();
   document.getElementById('overlay').classList.add('open');
 }
 
@@ -1174,10 +1196,85 @@ function openEdit(id){
     document.getElementById('f_plateCustom').value = t.Plate || '';
   }
   updateDistPreview();
+  loadFormPhotos(id);   // ดึงรูปประกอบเดิมของทริปมาให้เพิ่ม/ลบได้
   document.getElementById('overlay').classList.add('open');
 }
 
 function closeSheet(){ document.getElementById('overlay').classList.remove('open'); }
+
+/* ============================================================
+   รูปประกอบทริป (ฟอร์มกรอกย้อนหลัง / แก้ไขทริป)
+   ถ่ายด้วยกล้องในเว็บ หรือเลือกจากคลังรูป / ไฟล์ / Google Drive (input file ของมือถือให้เลือกแหล่งเอง)
+   ============================================================ */
+const MAX_TRIP_PHOTOS = 6;
+let formPhotos = [];            // [{path: '/uploads/..' (รูปที่อยู่บนเซิร์ฟเวอร์แล้ว) | null, data: dataURL รูปใหม่ | null, src: ใช้แสดง}]
+let formPhotosState = 'ready';  // 'loading' = กำลังโหลดรูปเดิมตอนแก้ไข · 'error' = โหลดไม่ได้ (บันทึกได้ แต่จะไม่แตะรูปเดิม)
+function renderFormPhotos(){
+  const grid = document.getElementById('f_photoGrid');
+  grid.innerHTML = formPhotos.map((p,i)=>`<div class="photo-cell"><img src="${escapeHtml(p.src)}" alt="รูปที่ ${i+1}"><button type="button" class="rm" data-i="${i}" aria-label="ลบรูปนี้"><svg class="ic" viewBox="0 0 24 24">${ic('close')}</svg></button></div>`).join('');
+  grid.querySelectorAll('img').forEach(img=>img.onclick = ()=>openLightbox(img.src));
+  grid.querySelectorAll('.rm').forEach(b=>b.onclick = (e)=>{ e.stopPropagation(); formPhotos.splice(Number(b.dataset.i), 1); renderFormPhotos(); });
+  const off = formPhotos.length >= MAX_TRIP_PHOTOS || formPhotosState !== 'ready';
+  document.getElementById('f_photoCam').disabled = off;
+  document.getElementById('f_photoPick').disabled = off;
+  document.getElementById('f_photoNote').textContent =
+    formPhotosState==='loading' ? 'กำลังโหลดรูปเดิมของทริปนี้...' :
+    formPhotosState==='error' ? 'โหลดรูปเดิมไม่ได้ตอนนี้ — บันทึกได้ตามปกติ รูปเดิมจะไม่ถูกเปลี่ยน' :
+    formPhotos.length ? `แนบแล้ว ${formPhotos.length}/${MAX_TRIP_PHOTOS} รูป · แตะรูปเพื่อดูขยาย กด × เพื่อลบ` :
+    'เช่น รูปเลขไมค์ตอนออก-กลับ รูปหน้างาน ใบเสร็จ · เลือกได้จากคลังรูป ไฟล์ หรือ Google Drive';
+}
+function resetFormPhotos(){ formPhotos = []; formPhotosState = 'ready'; renderFormPhotos(); }
+async function loadFormPhotos(id){
+  formPhotos = []; formPhotosState = 'loading'; renderFormPhotos();
+  let paths = null;
+  try{
+    if(isDemo){ const t = trips.find(x=>x.ID===id); paths = (t && t.Photos) || []; }
+    else{
+      const r = await fetch(CONFIG.API_URL + '/trips/' + id + '/detail');
+      const j = await r.json();
+      if(!j.ok) throw new Error('detail failed');
+      paths = j.photos || [];
+    }
+  }catch(e){ paths = null; }
+  if(editingId !== id) return;   // ระหว่างโหลด ผู้ใช้ปิดฟอร์มหรือเปิดทริปอื่นไปแล้ว
+  if(paths){ formPhotos = paths.map(p=>({ path:p, data:null, src:photoUrl(p) })); formPhotosState = 'ready'; }
+  else formPhotosState = 'error';
+  renderFormPhotos();
+}
+async function formTakePhoto(){
+  if(formPhotos.length >= MAX_TRIP_PHOTOS) return;
+  const p = await openCamera('ถ่ายรูปประกอบทริป เช่น เลขไมค์ หน้างาน หรือใบเสร็จ');
+  if(p){ formPhotos.push({ path:null, data:p, src:p }); renderFormPhotos(); }
+}
+async function onFormPhotoFiles(e){
+  const files = [...(e.target.files || [])];
+  e.target.value = '';
+  const room = MAX_TRIP_PHOTOS - formPhotos.length;
+  if(files.length > room) showToast(`แนบได้อีก ${room} รูป (สูงสุด ${MAX_TRIP_PHOTOS} รูป)`);
+  for(const f of files.slice(0, room)){
+    try{ const d = await fileToJpeg(f); formPhotos.push({ path:null, data:d, src:d }); }
+    catch(err){ showToast(`เปิดไฟล์ "${f.name}" ไม่ได้ — ต้องเป็นรูป เช่น JPG / PNG`); }
+  }
+  renderFormPhotos();
+}
+// ย่อรูปให้ด้านยาวไม่เกิน 1600px แล้วแปลงเป็น JPEG (รูปจากมือถือบางรุ่นใหญ่หลาย MB)
+function fileToJpeg(file, maxSide = 1600){
+  return new Promise((resolve, reject)=>{
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = ()=>{
+      const k = Math.min(1, maxSide / Math.max(img.naturalWidth, img.naturalHeight));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+      const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, c.width, c.height);
+      x.drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      resolve(c.toDataURL('image/jpeg', 0.85));
+    };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); reject(new Error('decode failed')); };
+    img.src = url;
+  });
+}
 
 /* ============================================================
    กล้องถ่ายรูปสด (บังคับใช้กล้องจริงเท่านั้น ไม่ใช้แกลลอรี่)
@@ -1550,16 +1647,17 @@ async function openDetail(id){
   body.innerHTML = '<div class="spin"></div>';
   document.getElementById('detailOverlay').classList.add('open');
 
-  let trip, stops = [];
+  let trip, stops = [], photos = [];
   if(isDemo){
     trip = trips.find(t=>t.ID===id);
     stops = [];
+    photos = (trip && trip.Photos) || [];
   } else {
     try{
       const r = await fetch(CONFIG.API_URL + '/trips/' + id + '/detail');
       const j = await r.json();
       if(!j.ok) throw new Error();
-      trip = j.trip; stops = j.stops;
+      trip = j.trip; stops = j.stops; photos = j.photos || [];
     }catch(e){
       trip = trips.find(t=>t.ID===id);
       stops = [];
@@ -1578,6 +1676,7 @@ async function openDetail(id){
   html += `<div class="detail-row"><span><svg class="ic" viewBox="0 0 24 24" style="width:13px;height:13px">${ic('circle-user')}</svg> · <svg class="ic" viewBox="0 0 24 24" style="width:13px;height:13px">${ic('car-alt')}</svg></span><span>${escapeHtml(trip.UserOut||'-')} · <span class="mono">${plateDisplay(trip.Plate)}</span></span></div>`;
   html += `<div class="detail-row"><span><svg class="ic" viewBox="0 0 24 24" style="width:13px;height:13px">${ic('tachometer-fast')}</svg> ระยะทางรวม</span><span class="mono">${dist!=null ? dist.toLocaleString()+' กม.' : '-'}</span></div>`;
   if(trip.PurposeDetail) html += `<div class="detail-row"><span>หมายเหตุ</span><span>${escapeHtml(trip.PurposeDetail)}</span></div>`;
+  if(photos.length) html += `<div class="detail-photo-block"><label><svg class="ic" viewBox="0 0 24 24" style="width:12px;height:12px">${ic('image')}</svg> รูปภาพประกอบ (${photos.length})</label>${photoGridHTML(photos)}</div>`;
 
   // ---------- Timeline: เล่าเป็นเรื่องราวว่าไปไหนมา เมื่อไหร่ ----------
   html += `<div class="detail-photo-block"><label><svg class="ic" viewBox="0 0 24 24" style="width:12px;height:12px">${ic('route')}</svg> เส้นทางการเดินทาง</label>`;
@@ -1732,6 +1831,8 @@ function paintAllStaticIcons(){
   paintIcon(document.querySelector('.eyebrow .ic'), 'car-journey');
   paintIcon(document.querySelector('.back-link .ic'), 'arrow-small-right');
   paintIcon(document.getElementById('icReport'), 'tachometer-fast');
+  paintIcon(document.querySelector('#f_photoCam .ic'), 'camera');
+  paintIcon(document.querySelector('#f_photoPick .ic'), 'image');
   paintIcon(document.querySelector('#modeBadge .ic'), 'interrogation');
   paintIcon(document.getElementById('icPrev'), 'arrow-small-left');
   paintIcon(document.getElementById('icNext'), 'arrow-small-right');
@@ -1843,6 +1944,10 @@ async function init(){
   document.getElementById('platePick').addEventListener('click',(e)=>{ const o=e.target.closest('.plate-opt'); if(o) setPlate(o.dataset.plate); });
   document.getElementById('f_mStart').addEventListener('input', updateDistPreview);
   document.getElementById('f_mEnd').addEventListener('input', updateDistPreview);
+  // รูปประกอบทริปในฟอร์มกรอกย้อนหลัง
+  document.getElementById('f_photoCam').onclick = formTakePhoto;
+  document.getElementById('f_photoPick').onclick = ()=>document.getElementById('f_photoFile').click();
+  document.getElementById('f_photoFile').addEventListener('change', onFormPhotoFiles);
   document.getElementById('brandTabs').addEventListener('click',(e)=>{ const b=e.target.closest('button'); if(b) setFormBrand(b.dataset.brand); });
   setupDestField('f_dest', ()=>formBrand, setFormBrand);
   initBranchPicker();
@@ -1896,6 +2001,19 @@ async function init(){
     saveBtn.innerHTML = '<span class="spin-sm"></span> กำลังบันทึก...';
     try{
       const isEdit = !!editingId;
+      // รูปประกอบ: อัปโหลดเฉพาะรูปใหม่ รูปเดิมใช้ path เดิม (ถ้าโหลดรูปเดิมไม่สำเร็จ ไม่ส่ง Photos = API ไม่แตะรูปเดิม)
+      if(formPhotosState === 'ready'){
+        const fresh = formPhotos.filter(p=>!p.path).length;
+        let n = 0;
+        for(const p of formPhotos){
+          if(p.path) continue;
+          saveBtn.innerHTML = `<span class="spin-sm"></span> กำลังอัปโหลดรูป (${++n}/${fresh})...`;
+          try{ p.path = await uploadPhotoDataUrl(p.data); }   // จำ path ไว้ ถ้ากดบันทึกซ้ำจะไม่อัปโหลดซ้ำ
+          catch(upErr){ throw new Error('อัปโหลดรูปไม่สำเร็จ เช็คการเชื่อมต่อแล้วลองใหม่'); }
+        }
+        payload.Photos = formPhotos.map(p=>p.path);
+        saveBtn.innerHTML = '<span class="spin-sm"></span> กำลังบันทึก...';
+      }
       if(editingId){ payload.ID = editingId; await apiUpdate(payload); }
       else{ await apiAdd(payload); }
       trips = await apiGetTrips();
@@ -1908,9 +2026,11 @@ async function init(){
 
       closeSheet();
       const action = isEdit ? 'แก้ไขทริป' : 'เพิ่มทริปใหม่';
-      showToast(`${action}ไปที่ "${payload.DestName}" วันที่ ${fmtDate(payload.OutDate)} บันทึกเรียบร้อยแล้ว`);
+      const nPh = (payload.Photos||[]).length;
+      showToast(`${action}ไปที่ "${payload.DestName}" วันที่ ${fmtDate(payload.OutDate)}${nPh?` พร้อมรูป ${nPh} รูป`:''} บันทึกเรียบร้อยแล้ว`);
     }catch(err){
-      showToast('บันทึกไม่สำเร็จ เช็คการเชื่อมต่อแล้วลองใหม่');
+      // TypeError = เน็ตหลุด/เชื่อมต่อไม่ได้ · อย่างอื่นเป็นข้อความจาก API ที่อ่านรู้เรื่อง
+      showToast('บันทึกไม่สำเร็จ: ' + ((err instanceof TypeError || !err.message) ? 'เช็คการเชื่อมต่อแล้วลองใหม่' : err.message));
     }
     saveBtn.classList.remove('is-success');
     saveBtn.innerHTML = saveBtnOriginal;
