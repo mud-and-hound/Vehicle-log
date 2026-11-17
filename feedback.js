@@ -364,7 +364,7 @@ function statusChip(s){ return `<span class="fbk-st st-${esc(s)}"><i></i>${esc(S
 function whereLine(it){ return `<div class="fbk-where">${icon('page')}<b>${esc(it.Page || 'ไม่ระบุหน้า')}</b>${it.Area ? ` › ${esc(it.Area)}` : ''}</div>`; }
 
 function renderList(body){
-  let h = `<button class="fbk-primary" id="fbkNew">${icon('plus')}แจ้งปรับปรุง / แก้ไข / ขอเพิ่ม</button>`;
+  let h = `<button class="fbk-primary" id="fbkNew">${icon('plus')}แจ้ง เพิ่ม / แก้ไข / ลบ / ปรับปรุง</button>`;
   if(draftDirty()) h += `<button class="fbk-draft" id="fbkDraft">${icon('pencil')}<span>มี<b>ร่างที่ยังไม่ส่ง</b> — แตะเพื่อเขียนต่อ</span></button>`;
   if(S.err && !S.items.length){
     body.innerHTML = h + `<div class="fbk-err">${esc(S.err)}<br><button class="fbk-secondary" id="fbkRetry" style="margin-top:10px">ลองใหม่</button></div>`;
