@@ -285,6 +285,61 @@ html.has-uibar .hero .stat-row{margin-top:2px}
 .gps-tag{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:var(--tx3);margin-top:5px}
 .gps-tag .ic{width:11px;height:11px;color:var(--amber)}
 
+/* ---------- รถ: ปุ่มเลือกรถแยกตามประเภท / ฟอร์มจัดการรถ ---------- */
+.vt{width:1em;height:1em;display:inline-block;vertical-align:-0.14em;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.pchip .vt{width:15px;height:15px}
+.pchip.manage{color:var(--tx3);border-style:dashed}
+.plate-pick{flex-wrap:wrap}
+.plate-grp{flex-basis:100%;font-size:10.5px;color:var(--tx3);font-weight:500;margin:4px 0 -2px}
+.plate-pick .plate-opt{flex:0 1 calc(50% - 4px);min-width:0;cursor:pointer}
+.plate-pick .plate-opt.add{flex-basis:100%}
+.plate-opt .vt{width:16px;height:16px}
+.plate-opt span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.plate-opt.add{border-style:dashed;color:var(--tx3);font-family:var(--sans)}
+.plate-opt.legacy{border-style:dotted}
+.vtype-pick{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.vtype-pick button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 2px;border-radius:var(--r3);border:1px solid var(--line);background:var(--panel);font-size:11px;color:var(--tx2)}
+.vtype-pick button .vt{width:22px;height:22px}
+.vtype-pick button.sel{border-color:var(--amber);color:var(--amber);font-weight:600}
+.veh-grp{font-size:11px;font-weight:600;color:var(--tx3);margin:14px 0 6px;display:flex;align-items:center;gap:6px}
+.veh-grp:first-child{margin-top:0}
+.veh-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r3);background:var(--panel);margin-bottom:6px}
+.veh-row .vt{width:22px;height:22px;color:var(--tx2)}
+.veh-row .m{flex:1;min-width:0}
+.veh-row .m b{display:block;font-family:var(--mono);font-size:14px}
+.veh-row .m small{display:block;font-size:11px;color:var(--tx3);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.veh-row.off{opacity:.6}
+.veh-row .off-tag{font-size:10px;border:1px solid var(--line);border-radius:5px;padding:0 5px;margin-left:6px;font-family:var(--sans);font-weight:400;color:var(--tx3)}
+.veh-act{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--tx3);flex-shrink:0}
+.veh-act:hover{background:var(--ink)}
+.veh-act.del:hover{color:var(--bad)}
+.veh-act .ic{width:15px;height:15px}
+.veh-add{font-size:11.5px;color:var(--amber);border:1px solid var(--amber);border-radius:9px;padding:6px 10px;flex-shrink:0}
+.veh-empty{font-size:12.5px;color:var(--tx3);text-align:center;padding:14px}
+
+/* ---------- กำลังเดินทาง: แถวเดียวต่อทริป + ปุ่มเล็ก (แตะแถว = ดูรายละเอียด) ---------- */
+.live-box{background:var(--panel);border:1px solid var(--line);border-radius:var(--r2);overflow:hidden}
+.live-head{display:flex;align-items:center;gap:8px;padding:9px 10px 9px 13px;font-size:12.5px;color:var(--tx2)}
+.live-head b{color:var(--tx);font-weight:600;white-space:nowrap}
+.live-head .n{font-size:11px;color:var(--tx3);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--amber);animation:pulse 1.4s ease infinite;flex-shrink:0}
+.live-dot.off{background:var(--line);animation:none}
+.live-new{margin-left:auto;white-space:nowrap;flex-shrink:0;display:inline-flex;align-items:center;gap:5px;padding:6px 11px;border-radius:9px;background:var(--amber);color:var(--amber-ink);font-size:12px;font-weight:600}
+.live-new .ic{width:13px;height:13px}
+.live-row{display:flex;align-items:center;gap:10px;padding:9px 10px 9px 13px;border-top:1px solid var(--line);cursor:pointer}
+.live-row:hover{background:var(--ink)}
+.live-row > .vt{width:20px;height:20px;color:var(--tx2)}
+.live-main{flex:1;min-width:0;font-size:13px;line-height:1.35}
+.live-main b{font-family:var(--mono);font-weight:600}
+.live-main small{display:block;font-size:11px;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.live-stale{color:var(--bad);font-size:10px;border:1px solid var(--line);border-radius:5px;padding:0 4px;margin-left:4px;white-space:nowrap}
+.live-acts{display:flex;gap:4px;flex-shrink:0}
+.live-acts button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;width:40px;height:40px;border-radius:9px;border:1px solid var(--line);background:var(--ink);font-size:9.5px;color:var(--tx2)}
+.live-acts button .ic{width:15px;height:15px}
+.live-acts button.fin .ic{color:#c0392b}
+.live-acts button.del{color:var(--tx3);border-color:transparent;background:none;width:32px}
+.live-acts button.del:hover{color:var(--bad)}
+
 /* ---------- Active trip banner ---------- */
 .active-wrap{padding:0 18px;display:flex;flex-direction:column;gap:8px;margin-top:10px}
 .active-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r2);padding:14px 16px;box-shadow:0 1px 3px rgba(46,42,36,.04)}
@@ -343,8 +398,8 @@ html.has-uibar .hero .stat-row{margin-top:2px}
   <span class="demo-badge" id="modeBadge"><svg class="ic"></svg>โหมดตัวอย่าง — ยังไม่เชื่อมฐานข้อมูล</span>
   <div class="stat-row stat-loading" id="statRow">
     <div class="stat"><div class="si"><svg class="ic" id="statIc1"></svg></div><div class="v mono" id="odoTrips">0</div><div class="l">เที่ยวเดือนนี้</div></div>
-    <div class="stat"><div class="si"><svg class="ic" id="statIc2"></svg></div><div class="v mono" id="odoA">0</div><div class="l">กม. รถ 7643</div></div>
-    <div class="stat"><div class="si"><svg class="ic" id="statIc3"></svg></div><div class="v mono" id="odoB">0</div><div class="l">กม. รถ 8066</div></div>
+    <div class="stat"><div class="si"><svg class="ic" id="statIc2"></svg></div><div class="v mono" id="odoA">0</div><div class="l" id="odoALbl">กม. รถ 7643</div></div>
+    <div class="stat"><div class="si"><svg class="ic" id="statIc3"></svg></div><div class="v mono" id="odoB">0</div><div class="l" id="odoBLbl">กม. รถ 8066</div></div>
   </div>
 </div>
 
@@ -363,8 +418,6 @@ html.has-uibar .hero .stat-row{margin-top:2px}
   <div class="row-between">
     <div class="plate-row" id="plateSeg" style="flex:1">
       <button class="pchip active" data-plate="ALL"><svg class="ic"></svg>ทุกคัน</button>
-      <button class="pchip" data-plate="A"><svg class="ic"></svg>3ฒษ-7643</button>
-      <button class="pchip" data-plate="B"><svg class="ic"></svg>3ฒภ-8066</button>
     </div>
     <button id="exportBtn" title="Export ข้อมูล" style="flex-shrink:0;width:38px;height:38px;border-radius:9px;background:var(--panel);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--tx2)"><svg class="ic" style="width:16px;height:16px"></svg></button>
   </div>
@@ -426,13 +479,8 @@ html.has-uibar .hero .stat-row{margin-top:2px}
       </div>
 
       <div class="field">
-        <label>ทะเบียนรถ</label>
-        <div class="plate-pick" id="platePick">
-          <div class="plate-opt" data-plate="A"><svg class="ic"></svg>3ฒษ-7643</div>
-          <div class="plate-opt" data-plate="B"><svg class="ic"></svg>3ฒภ-8066</div>
-          <div class="plate-opt" data-plate="OTHER"><svg class="ic"></svg>อื่นๆ</div>
-        </div>
-        <input type="text" id="f_plateCustom" placeholder="กรอกทะเบียนรถ เช่น 9กร-3643" style="display:none;margin-top:8px">
+        <label>รถที่ใช้</label>
+        <div class="plate-pick" id="platePick"></div>
       </div>
 
       <div class="field">
@@ -552,10 +600,7 @@ html.has-uibar .hero .stat-row{margin-top:2px}
       <div class="field"><label>ผู้ใช้ (ผู้เบิกรถ)</label><input type="text" id="st_user" placeholder="ชื่อ" required></div>
       <div class="field">
         <label>ทะเบียนรถ</label>
-        <select id="st_plate">
-          <option value="A">3ฒษ-7643</option>
-          <option value="B">3ฒภ-8066</option>
-        </select>
+        <select id="st_plate"></select>
       </div>
     </div>
     <div class="field">
@@ -634,6 +679,44 @@ html.has-uibar .hero .stat-row{margin-top:2px}
   </div>
 </div>
 
+<!-- รถทั้งหมด: เพิ่ม / แก้ไข / ลบ / แยกประเภท -->
+<div class="overlay" id="vehOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title"><svg class="ic" id="vehTitleIc"></svg><h2>รถทั้งหมด</h2></div>
+    <div id="vehBody"></div>
+    <div class="sheet-actions">
+      <button type="button" class="btn-cancel" id="veh_closeBtn"><svg class="ic"></svg>ปิด</button>
+      <button type="button" class="btn-save" id="veh_addBtn"><svg class="ic"></svg>เพิ่มรถ</button>
+    </div>
+  </div>
+</div>
+
+<!-- เพิ่ม / แก้ไขรถ 1 คัน -->
+<div class="overlay" id="vehEditOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title"><svg class="ic" id="vehEditTitleIc"></svg><h2 id="vehEditTitle">เพิ่มรถ</h2></div>
+    <div class="field">
+      <label>ประเภทรถ</label>
+      <div class="vtype-pick" id="ve_type"></div>
+    </div>
+    <div class="field"><label>ทะเบียนรถ</label><input type="text" id="ve_plate" maxlength="30" placeholder="เช่น 3ฒษ-7643 หรือ 1กข-1234" autocomplete="off"></div>
+    <div class="field"><label>ชื่อเรียก / หมายเหตุ <span style="font-weight:400">— ไม่บังคับ</span></label><input type="text" id="ve_note" maxlength="100" placeholder="เช่น Toyota Vios สีขาว / Honda Wave" autocomplete="off"></div>
+    <div class="field" id="ve_activeField">
+      <label>สถานะ</label>
+      <div class="chips-wrap" id="ve_active">
+        <button type="button" class="chip" data-a="1">ใช้งานอยู่</button>
+        <button type="button" class="chip" data-a="0">เลิกใช้แล้ว (ซ่อนจากตัวเลือก)</button>
+      </div>
+    </div>
+    <div class="sheet-actions">
+      <button type="button" class="btn-cancel" id="ve_cancelBtn"><svg class="ic"></svg>ยกเลิก</button>
+      <button type="button" class="btn-save" id="ve_saveBtn"><svg class="ic"></svg>บันทึก</button>
+    </div>
+  </div>
+</div>
+
 <!-- ป๊อปอัพค้นหาสาขา (ใช้ร่วมกันทั้งฟอร์มกรอกย้อนหลัง และฟอร์มจุดแวะ/จบทริป) -->
 <div class="picker-overlay" id="branchPicker" role="dialog" aria-modal="true" aria-labelledby="bpTitle">
   <div class="picker">
@@ -677,7 +760,30 @@ function paintIcon(el, name){ el.innerHTML = ic(name); el.setAttribute('viewBox'
 /* ====== ตั้งค่าการเชื่อมต่อ ====== */
 const CONFIG = { API_URL: 'https://vehiclelog.mobile1234.site' };
 
-const PLATES = { A: '3ฒษ-7643', B: '3ฒภ-8066' };
+const PLATES = { A: '3ฒษ-7643', B: '3ฒภ-8066' };   // ใช้สำรองเมื่อโหลดรายชื่อรถไม่ได้
+/* ---------- รถ: รายชื่อรถมาจาก API /vehicles (เพิ่ม / แก้ไข / ลบ / แยกประเภทได้) ----------
+   Key = ค่าที่เก็บใน trips.Plate: รถเดิมใช้ A / B, รถที่เพิ่มใหม่ใช้ทะเบียนเป็น Key */
+const VEHICLE_TYPES = { car:'รถยนต์', pickup:'รถกระบะ', van:'รถตู้', motorcycle:'มอเตอร์ไซค์', other:'อื่นๆ' };
+const VT_ICON = {
+  car:'<path d="M5 16.5h14M6.5 16.5v2M17.5 16.5v2"/><path d="M4 16.5v-4l2.2-5A2 2 0 0 1 8 6.3h8a2 2 0 0 1 1.8 1.2l2.2 5v4"/><path d="M4 12.5h16"/>',
+  pickup:'<path d="M3 16.5h18M5.5 16.5v2M18.5 16.5v2"/><path d="M3 16.5V13l2-5h6.5v5H21v3.5"/><path d="M3 13h8.5"/>',
+  van:'<path d="M3 16.5h18M5.5 16.5v2M18.5 16.5v2"/><path d="M3 16.5V8a2 2 0 0 1 2-2h10l5 5v5.5"/><path d="M3 11h17M10 6v5"/>',
+  motorcycle:'<circle cx="5.5" cy="16" r="3"/><circle cx="18.5" cy="16" r="3"/><path d="M5.5 16 9 10h5l4.5 6M14 10l-1.5-3H15M9 10 8 8H5.5"/>',
+  other:'<rect x="3.5" y="6" width="17" height="10" rx="2"/><path d="M6.5 16v2.5M17.5 16v2.5M3.5 11h17"/>',
+};
+const vtIcon = t => `<svg class="vt" viewBox="0 0 24 24" aria-hidden="true">${VT_ICON[t] || VT_ICON.other}</svg>`;
+let VEHICLES = [{Key:'A', Plate:'3ฒษ-7643', Type:'car', Note:'', Active:true, Order:1}, {Key:'B', Plate:'3ฒภ-8066', Type:'car', Note:'', Active:true, Order:2}];
+let UNREG_PLATES = [];   // ทะเบียนที่มีในทริปแต่ยังไม่ได้เพิ่มเป็นรถ
+const vehicleOf = key => VEHICLES.find(v=>v.Key===key);
+const activeVehicles = () => VEHICLES.filter(v=>v.Active!==false);
+async function loadVehicles(){
+  if(isDemo) return;
+  try{
+    const r = await fetch(CONFIG.API_URL + '/vehicles');
+    const j = await r.json();
+    if(j.ok && Array.isArray(j.data)){ VEHICLES = j.data; UNREG_PLATES = j.unregistered || []; }
+  }catch(e){ /* API เก่าที่ยังไม่มี /vehicles → ใช้รายชื่อรถเริ่มต้น */ }
+}
 const PURPOSES = ['เปิดร้าน','ปิดร้าน','ซ่อมบำรุง','เก็บอุปกรณ์','ติดตั้ง/เปลี่ยนอุปกรณ์ POS','ตรวจเช็คระบบ','ประชุม/อบรม','อื่นๆ'];
 const THAI_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
 const THAI_MONTHS_SHORT = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
@@ -783,7 +889,7 @@ function showToast(msg){ const t=document.getElementById('toast'); t.textContent
 function fmtDate(iso){ if(!iso) return '-'; const d=new Date(iso+'T00:00:00'); return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear(); }
 function fmtTime(iso){ if(!iso) return ''; const d=new Date(iso.replace(' ','T')); if(isNaN(d)) return ''; const p=n=>String(n).padStart(2,'0'); return p(d.getHours())+':'+p(d.getMinutes())+' น.'; }
 function fmtDateShort(iso){ if(!iso) return ''; const d=new Date(iso+'T00:00:00'); const p=n=>String(n).padStart(2,'0'); return p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+String(d.getFullYear()).slice(-2); }
-function plateDisplay(p){ if(!p) return ''; return PLATES[p] || p; } // รองรับทะเบียนที่พิมพ์เอง (ไม่ใช่ A/B)
+function plateDisplay(p){ if(!p) return ''; const v = vehicleOf(p); return v ? v.Plate : (PLATES[p] || p); } // รถในรายชื่อ / ทะเบียนที่เคยพิมพ์เอง (ไม่ใช่ A/B)
 function photoGridHTML(list){
   const arr = (list||[]).filter(Boolean);
   if(arr.length===0) return '';
@@ -1085,11 +1191,15 @@ function render(){
   renderPerPage(allViewTrips.length, viewTrips.length);
 
   const distOf = t => (t.MileageEnd!=null && t.MileageEnd!=='' && t.MileageStart!=null && t.MileageStart!=='' && Number(t.MileageEnd)>=Number(t.MileageStart)) ? (Number(t.MileageEnd)-Number(t.MileageStart)) : 0;
-  const distA = monthTrips.filter(t=>t.Plate==='A').reduce((s,t)=>s+distOf(t),0);
-  const distB = monthTrips.filter(t=>t.Plate==='B').reduce((s,t)=>s+distOf(t),0);
+  // กล่องสถิติ 2 อันขวา = รถ 2 คันแรกในรายชื่อ (มีคันเดียว → กล่องที่ 3 เป็นระยะรวมทุกคัน)
+  const [vA, vB] = activeVehicles();
+  const kmOf = key => monthTrips.filter(t=>t.Plate===key).reduce((s,t)=>s+distOf(t),0);
+  document.getElementById('odoALbl').textContent = vA ? `กม. ${vA.Plate}` : 'กม. รวม';
+  document.getElementById('odoBLbl').textContent = vB ? `กม. ${vB.Plate}` : 'กม. รวมทุกคัน';
   animateNum(document.getElementById('odoTrips'), monthTrips.length);
-  animateNum(document.getElementById('odoA'), distA);
-  animateNum(document.getElementById('odoB'), distB);
+  animateNum(document.getElementById('odoA'), vA ? kmOf(vA.Key) : monthTrips.reduce((s,t)=>s+distOf(t),0));
+  animateNum(document.getElementById('odoB'), vB ? kmOf(vB.Key) : monthTrips.reduce((s,t)=>s+distOf(t),0));
+  renderPlateChips(monthTrips);
   document.getElementById('statRow').classList.remove('stat-loading');
 
   const box = document.getElementById('listBox');
@@ -1148,7 +1258,7 @@ async function deleteTrip(id, btnEl){
     trips = await apiGetTrips();
     await loadActiveTrips();
     render();
-    showToast(`ลบ${label}ออกจากระบบแล้ว`);
+    showToast(`ลบ${label} ออกจากระบบแล้ว`);
     if(btnEl){ btnEl.disabled = false; btnEl.innerHTML = original; }
     return true;
   }catch(err){
@@ -1172,7 +1282,9 @@ function openAdd(){
   setDateValue('f_outDate', selDate || new Date().toISOString().slice(0,10));
   setDateValue('f_inDate', '');
   purposeChipsRender('');
-  setPlate('A');
+  const firstKey = (activeVehicles()[0] || {}).Key || '';
+  renderPlatePick(firstKey);
+  setPlate(firstKey);
   setFormBrand('GD');
   updateDistPreview();
   resetFormPhotos();
@@ -1194,12 +1306,8 @@ function openEdit(id){
   document.getElementById('f_mStart').value = t.MileageStart ?? '';
   document.getElementById('f_mEnd').value = t.MileageEnd ?? '';
   purposeChipsRender(t.PurposeType||'');
-  if(t.Plate === 'A' || t.Plate === 'B'){
-    setPlate(t.Plate || 'A');
-  } else {
-    setPlate('OTHER');
-    document.getElementById('f_plateCustom').value = t.Plate || '';
-  }
+  renderPlatePick(t.Plate || '');
+  setPlate(t.Plate || '');
   updateDistPreview();
   loadFormPhotos(id);   // ดึงรูปประกอบเดิมของทริปมาให้เพิ่ม/ลบได้
   document.getElementById('overlay').classList.add('open');
@@ -1394,24 +1502,42 @@ async function loadActiveTrips(){
 }
 function renderActiveTrips(){
   const wrap = document.getElementById('activeTripWrap');
-  if(activeTrips.length===0){ wrap.innerHTML=''; return; }
-  wrap.innerHTML = activeTrips.map(t=>`
-    <div class="active-card" data-id="${t.ID}">
-      <div class="active-card-top"><svg class="ic" viewBox="0 0 24 24" style="width:13px;height:13px;color:var(--tx3)">${ic('map-pin')}</svg>กำลังเดินทาง · ${PLATES[t.Plate]||t.Plate}</div>
-      <div class="active-card-body"><b>${escapeHtml(t.UserOut||'-')}</b> · ไมค์ล่าสุด <b class="mono">${(t.MileageEnd??t.MileageStart??'-').toLocaleString?.()||(t.MileageEnd??t.MileageStart)}</b> กม.</div>
-      <div class="active-card-actions">
-        <button class="btn-addstop" data-action="addstop"><svg class="ic" viewBox="0 0 24 24">${ic('location-pin-parking')}</svg>จุดแวะ</button>
-        <button class="btn-finish" data-action="finish"><svg class="ic" viewBox="0 0 24 24">${ic('finish-flag')}</svg>จบทริป</button>
-      </div>
-    </div>`).join('');
-  wrap.querySelectorAll('.active-card').forEach(card=>{
-    const id = card.dataset.id;
-    card.querySelector('.active-card-body').style.cursor = 'pointer';
-    card.querySelector('.active-card-body').onclick = ()=>openDetail(id);
-    card.querySelector('[data-action="addstop"]').onclick = ()=>openStopSheet(id, 'add');
-    card.querySelector('[data-action="finish"]').onclick = ()=>openStopSheet(id, 'finish');
+  const today = localDateStr();
+  const icBtn = (n, label, act, cls) => `<button type="button" class="${cls||''}" data-act="${act}" title="${label}" aria-label="${label}"><svg class="ic" viewBox="0 0 24 24">${ic(n)}</svg>${cls==='del'?'':label}</button>`;
+  const head = activeTrips.length
+    ? `<div class="live-head"><span class="live-dot"></span><b>กำลังเดินทาง</b><span class="n">${activeTrips.length} คัน · แตะแถวเพื่อดูรายละเอียด</span>`
+    : `<div class="live-head"><span class="live-dot off"></span><b>ไม่มีทริปที่กำลังเดินทาง</b>`;
+  wrap.innerHTML = `<div class="live-box">${head}
+      <button type="button" class="live-new" id="liveNewBtn"><svg class="ic" viewBox="0 0 24 24">${ic('plus')}</svg>เริ่มทริป</button></div>
+    ${activeTrips.map(t=>{
+      const v = vehicleOf(t.Plate);
+      const mile = t.MileageEnd ?? t.MileageStart;
+      const days = t.OutDate && t.OutDate < today ? Math.round((new Date(today) - new Date(t.OutDate)) / 86400000) : 0;
+      const started = days ? fmtDateShort(t.OutDate) : (t.CreatedAt ? fmtTime(t.CreatedAt) : 'วันนี้');
+      return `<div class="live-row" data-id="${t.ID}" role="button" tabindex="0" aria-label="ดูรายละเอียดทริป ${escapeHtml(plateDisplay(t.Plate))}">
+        ${vtIcon(v ? v.Type : 'car')}
+        <span class="live-main"><b>${escapeHtml(plateDisplay(t.Plate)||'-')}</b> · ${escapeHtml(t.UserOut||'-')}${days ? `<span class="live-stale">ค้าง ${days} วัน</span>` : ''}
+          <small>ไมค์ล่าสุด ${mile!=null && mile!=='' ? Number(mile).toLocaleString() : '-'} · เริ่ม ${started}</small></span>
+        <span class="live-acts">${icBtn('location-pin-parking','แวะ','stop')}${icBtn('finish-flag','จบ','finish','fin')}${icBtn('trash','ลบทริปนี้','del','del')}</span>
+      </div>`;
+    }).join('')}</div>`;
+  document.getElementById('liveNewBtn').onclick = openStartTrip;
+  wrap.querySelectorAll('.live-row').forEach(row=>{
+    const t0 = activeTrips.find(t=>String(t.ID)===row.dataset.id);
+    if(!t0) return;
+    const id = t0.ID;   // รหัสทริปจริง (ตัวเลขจาก API / ตัวอักษรในโหมดตัวอย่าง)
+    row.addEventListener('click', e=>{
+      const b = e.target.closest('[data-act]');
+      if(!b) return openDetail(id);
+      e.stopPropagation();
+      if(b.dataset.act==='stop') openStopSheet(id, 'add');
+      else if(b.dataset.act==='finish') openStopSheet(id, 'finish');
+      else deleteTrip(id, b);
+    });
+    row.addEventListener('keydown', e=>{ if(e.key==='Enter' && e.target===row) openDetail(id); });
   });
 }
+function localDateStr(){ const d = new Date(), p = n=>String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`; }
 
 /* ============================================================
    เริ่มทริปสด
@@ -1419,8 +1545,9 @@ function renderActiveTrips(){
 let stPhotoDataUrl = null, stGps = '';
 function openStartTrip(){
   document.getElementById('st_user').value = '';
-  document.getElementById('st_plate').value = 'A';
-  document.getElementById('st_mileage').value = suggestStartMileage('A');
+  const firstKey = (activeVehicles()[0] || {}).Key || '';
+  renderStartPlateSelect(firstKey);
+  document.getElementById('st_mileage').value = suggestStartMileage(firstKey);
   stPhotoDataUrl = null; stGps = '';
   document.getElementById('st_photoPreview').style.display = 'none';
   document.getElementById('st_photoBtn').classList.remove('has-photo');
@@ -1801,26 +1928,158 @@ function runExport(){
 }
 
 function setPlate(p){
-  document.querySelectorAll('.plate-opt').forEach(el=>el.classList.toggle('sel', el.dataset.plate===p));
+  document.querySelectorAll('#platePick .plate-opt').forEach(el=>el.classList.toggle('sel', el.dataset.plate===p));
   document.getElementById('platePick').dataset.value = p;
-  const customInput = document.getElementById('f_plateCustom');
   const hint = document.getElementById('mStartHint');
-  if(p==='OTHER'){
-    customInput.style.display = 'block';
-    customInput.focus();
-    if(!editingId){ document.getElementById('f_mStart').value = ''; }
-    hint.textContent = 'รถคันอื่นๆ ไม่มีประวัติไมค์ให้ดึงอัตโนมัติ กรอกเองได้เลย';
-  } else {
-    customInput.style.display = 'none';
-    if(!editingId){
-      const suggested = suggestStartMileage(p);
-      document.getElementById('f_mStart').value = suggested;
-      hint.textContent = suggested!=='' ? `ดึงมาจากไมค์สิ้นสุดของทริปล่าสุดของรถคันนี้ (${PLATES[p]}) แก้ไขได้` : `ยังไม่มีประวัติของรถคันนี้ กรอกเลขไมค์เริ่มต้นเอง`;
-    } else {
-      hint.textContent = '';
-    }
-  }
+  if(!editingId && p){
+    const suggested = suggestStartMileage(p);
+    document.getElementById('f_mStart').value = suggested;
+    hint.textContent = suggested!=='' ? `ดึงมาจากไมค์สิ้นสุดของทริปล่าสุดของรถคันนี้ (${plateDisplay(p)}) แก้ไขได้` : `ยังไม่มีประวัติของรถคันนี้ กรอกเลขไมค์เริ่มต้นเอง`;
+  } else hint.textContent = '';
   updateDistPreview();
+}
+
+// ตัวเลือกรถในฟอร์มกรอกย้อนหลัง: แยกกลุ่มตามประเภท + ปุ่ม "เพิ่มรถ" (ทริปเก่าที่ทะเบียนยังไม่อยู่ในรายชื่อ โชว์เป็นตัวเลือกพิเศษ)
+function renderPlatePick(selected){
+  const box = document.getElementById('platePick');
+  const list = activeVehicles().slice();
+  const sel = vehicleOf(selected);
+  if(sel && sel.Active===false) list.push(sel);   // แก้ทริปของรถที่เลิกใช้แล้ว ยังเลือกคันเดิมได้
+  let h = '';
+  Object.keys(VEHICLE_TYPES).forEach(t=>{
+    const g = list.filter(v=>v.Type===t);
+    if(!g.length) return;
+    h += `<div class="plate-grp">${VEHICLE_TYPES[t]}</div>` + g.map(v=>`<div class="plate-opt" data-plate="${escapeHtml(v.Key)}" title="${escapeHtml(v.Note||'')}">${vtIcon(v.Type)}<span>${escapeHtml(v.Plate)}</span></div>`).join('');
+  });
+  if(selected && !sel) h += `<div class="plate-grp">ทะเบียนเดิมของทริปนี้ (ยังไม่ได้เพิ่มเป็นรถ)</div><div class="plate-opt legacy" data-plate="${escapeHtml(selected)}">${vtIcon('other')}<span>${escapeHtml(selected)}</span></div>`;
+  h += `<div class="plate-grp"></div><div class="plate-opt add" data-add="1"><svg class="ic" viewBox="0 0 24 24">${ic('plus')}</svg><span>เพิ่มรถคันใหม่</span></div>`;
+  box.innerHTML = h;
+}
+function renderStartPlateSelect(selected){
+  const sel = document.getElementById('st_plate');
+  let h = '';
+  Object.keys(VEHICLE_TYPES).forEach(t=>{
+    const g = activeVehicles().filter(v=>v.Type===t);
+    if(g.length) h += `<optgroup label="${VEHICLE_TYPES[t]}">` + g.map(v=>`<option value="${escapeHtml(v.Key)}">${escapeHtml(v.Plate)}${v.Note?` — ${escapeHtml(v.Note)}`:''}</option>`).join('') + `</optgroup>`;
+  });
+  h += `<option value="__add">+ เพิ่มรถคันใหม่…</option>`;
+  sel.innerHTML = h;
+  sel.value = selected && activeVehicles().some(v=>v.Key===selected) ? selected : ((activeVehicles()[0]||{}).Key || '__add');
+  sel.dataset.prev = sel.value;
+}
+// ปุ่มกรองรถด้านบน: ทุกคัน + รถที่ใช้งานอยู่ + รถที่มีทริปเดือนนี้ + ปุ่มจัดการรถ
+function renderPlateChips(monthTrips){
+  const keys = new Set(activeVehicles().map(v=>v.Key));
+  (monthTrips||[]).forEach(t=>{ if(t.Plate) keys.add(t.Plate); });
+  if(curPlateFilter!=='ALL') keys.add(curPlateFilter);
+  const order = k => { const v = vehicleOf(k); return v ? (v.Active===false ? 500 : 0) + (v.Order||99) : 900; };
+  const chips = [...keys].sort((a,b)=>order(a)-order(b)).map(k=>{
+    const v = vehicleOf(k);
+    return `<button class="pchip${curPlateFilter===k?' active':''}" data-plate="${escapeHtml(k)}">${vtIcon(v ? v.Type : 'other')}${escapeHtml(plateDisplay(k))}</button>`;
+  });
+  document.getElementById('plateSeg').innerHTML =
+    `<button class="pchip${curPlateFilter==='ALL'?' active':''}" data-plate="ALL">${vtIcon('car')}ทุกคัน</button>` + chips.join('') +
+    `<button class="pchip manage" data-manage="1" title="เพิ่ม / แก้ไข / ลบ รถ"><svg class="ic" viewBox="0 0 24 24">${ic('settings')}</svg>จัดการรถ</button>`;
+}
+
+/* ---------- รถทั้งหมด: เพิ่ม / แก้ไข / ลบ ---------- */
+function openVehicleManager(){
+  renderVehicleManager();
+  document.getElementById('vehOverlay').classList.add('open');
+  loadVehicles().then(renderVehicleManager);   // ดึงจำนวนทริปล่าสุด
+}
+function renderVehicleManager(){
+  const body = document.getElementById('vehBody');
+  let h = '';
+  Object.keys(VEHICLE_TYPES).forEach(t=>{
+    const g = VEHICLES.filter(v=>v.Type===t);
+    if(!g.length) return;
+    h += `<div class="veh-grp">${vtIcon(t)}${VEHICLE_TYPES[t]} (${g.length})</div>` + g.map(v=>`
+      <div class="veh-row${v.Active===false?' off':''}">
+        ${vtIcon(v.Type)}
+        <span class="m"><b>${escapeHtml(v.Plate)}${v.Active===false?'<span class="off-tag">เลิกใช้แล้ว</span>':''}</b>
+          <small>${v.Note ? escapeHtml(v.Note) + ' · ' : ''}${v.TripCount!=null ? `ใช้ไป ${Number(v.TripCount).toLocaleString()} ทริป` : ''}</small></span>
+        <button type="button" class="veh-act" data-edit="${escapeHtml(v.Key)}" title="แก้ไข" aria-label="แก้ไข ${escapeHtml(v.Plate)}"><svg class="ic" viewBox="0 0 24 24">${ic('pencil')}</svg></button>
+        <button type="button" class="veh-act del" data-del="${escapeHtml(v.Key)}" title="ลบ" aria-label="ลบ ${escapeHtml(v.Plate)}"><svg class="ic" viewBox="0 0 24 24">${ic('trash')}</svg></button>
+      </div>`).join('');
+  });
+  if(!h) h = '<div class="veh-empty">ยังไม่มีรถ กด "เพิ่มรถ" ด้านล่าง</div>';
+  if(UNREG_PLATES.length){
+    h += `<div class="veh-grp">${vtIcon('other')}ทะเบียนที่พบในทริป แต่ยังไม่ได้เพิ่มเป็นรถ</div>` + UNREG_PLATES.map(u=>`
+      <div class="veh-row">${vtIcon('other')}<span class="m"><b>${escapeHtml(u.Plate)}</b><small>มี ${u.TripCount} ทริป · เพิ่มเป็นรถแล้วทริปเดิมจะผูกกับคันนี้ให้เอง</small></span>
+        <button type="button" class="veh-add" data-reg="${escapeHtml(u.Plate)}">เพิ่มเป็นรถ</button></div>`).join('');
+  }
+  body.innerHTML = h;
+  body.querySelectorAll('[data-edit]').forEach(b=>b.onclick = ()=>openVehicleEditor(vehicleOf(b.dataset.edit)));
+  body.querySelectorAll('[data-del]').forEach(b=>b.onclick = ()=>deleteVehicle(vehicleOf(b.dataset.del)));
+  body.querySelectorAll('[data-reg]').forEach(b=>b.onclick = ()=>openVehicleEditor(null, null, b.dataset.reg));
+}
+let vehEditing = null, vehAfterSave = null, vehType = 'car', vehActive = true;
+function openVehicleEditor(v, afterSave, presetPlate){
+  vehEditing = v || null; vehAfterSave = afterSave || null;
+  vehType = v ? v.Type : 'car'; vehActive = v ? v.Active!==false : true;
+  document.getElementById('vehEditTitle').textContent = v ? `แก้ไขรถ ${v.Plate}` : 'เพิ่มรถคันใหม่';
+  document.getElementById('ve_plate').value = v ? v.Plate : (presetPlate || '');
+  document.getElementById('ve_note').value = v ? (v.Note||'') : '';
+  document.getElementById('ve_activeField').style.display = v ? '' : 'none';
+  renderVehicleEditorChips();
+  document.getElementById('vehEditOverlay').classList.add('open');
+}
+function renderVehicleEditorChips(){
+  const box = document.getElementById('ve_type');
+  box.innerHTML = Object.entries(VEHICLE_TYPES).map(([k,l])=>`<button type="button" data-t="${k}" class="${vehType===k?'sel':''}">${vtIcon(k)}${l}</button>`).join('');
+  box.querySelectorAll('button').forEach(b=>b.onclick = ()=>{ vehType = b.dataset.t; renderVehicleEditorChips(); });
+  document.querySelectorAll('#ve_active .chip').forEach(c=>c.classList.toggle('active', (c.dataset.a==='1')===vehActive));
+}
+async function vehApi(method, path, body){
+  const r = await fetch(CONFIG.API_URL + path, { method, headers:{'Content-Type':'application/json'}, body: body ? JSON.stringify(body) : undefined });
+  if(!r.ok) throw await apiError(r);
+  return r.json();
+}
+async function saveVehicle(){
+  const plate = document.getElementById('ve_plate').value.trim();
+  if(!plate){ showToast('กรอกทะเบียนรถก่อนนะ'); document.getElementById('ve_plate').focus(); return; }
+  const body = { Plate: plate, Type: vehType, Note: document.getElementById('ve_note').value.trim(), Active: vehActive };
+  const btn = document.getElementById('ve_saveBtn'), orig = btn.innerHTML;
+  btn.disabled = true; btn.innerHTML = '<span class="spin-sm"></span> กำลังบันทึก...';
+  try{
+    let key;
+    if(isDemo){
+      if(vehEditing){ Object.assign(vehEditing, body); key = vehEditing.Key; }
+      else{ key = plate; VEHICLES.push({ Key:plate, ...body, Order: VEHICLES.length+1, TripCount:0 }); }
+    } else if(vehEditing){ await vehApi('PUT', '/vehicles/' + encodeURIComponent(vehEditing.Key), body); key = vehEditing.Key; }
+    else{ key = (await vehApi('POST', '/vehicles', body)).key; }
+    await loadVehicles();
+    document.getElementById('vehEditOverlay').classList.remove('open');
+    showToast(vehEditing ? `แก้ไขรถ ${plate} แล้ว` : `เพิ่มรถ ${plate} (${VEHICLE_TYPES[vehType]}) แล้ว`);
+    afterVehiclesChanged();
+    if(vehAfterSave) vehAfterSave(key);
+  }catch(err){ showToast('บันทึกไม่สำเร็จ: ' + ((err instanceof TypeError || !err.message) ? 'เช็คการเชื่อมต่อแล้วลองใหม่' : err.message)); }
+  btn.disabled = false; btn.innerHTML = orig;
+}
+async function deleteVehicle(v){
+  if(!v) return;
+  if(!confirm(`ลบรถ ${v.Plate} ออกจากรายชื่อใช่ไหม?`)) return;
+  try{
+    if(isDemo) VEHICLES = VEHICLES.filter(x=>x!==v);
+    else await vehApi('DELETE', '/vehicles/' + encodeURIComponent(v.Key));
+    await loadVehicles(); afterVehiclesChanged();
+    showToast(`ลบรถ ${v.Plate} แล้ว`);
+  }catch(err){
+    // มีทริปของรถคันนี้แล้ว ลบไม่ได้ → เสนอให้ตั้งเป็น "เลิกใช้แล้ว" แทน
+    if(err.message && err.message.includes('ลบไม่ได้') && confirm(err.message + '\n\nตั้งรถคันนี้เป็น "เลิกใช้แล้ว" (ซ่อนจากตัวเลือก) แทนไหม?')){
+      try{ await vehApi('PUT', '/vehicles/' + encodeURIComponent(v.Key), { Plate:v.Plate, Type:v.Type, Note:v.Note||'', Active:false }); await loadVehicles(); afterVehiclesChanged(); showToast(`ตั้ง ${v.Plate} เป็นเลิกใช้แล้ว`); }
+      catch(e2){ showToast('บันทึกไม่สำเร็จ: ' + e2.message); }
+    } else if(!(err.message && err.message.includes('ลบไม่ได้'))) showToast('ลบไม่สำเร็จ: ' + ((err instanceof TypeError || !err.message) ? 'เช็คการเชื่อมต่อแล้วลองใหม่' : err.message));
+  }
+}
+// รายชื่อรถเปลี่ยน → อัปเดตทุกจุดที่โชว์รถ
+function afterVehiclesChanged(){
+  render();
+  renderActiveTrips();
+  if(document.getElementById('vehOverlay').classList.contains('open')) renderVehicleManager();
+  if(document.getElementById('overlay').classList.contains('open')){ const cur = document.getElementById('platePick').dataset.value; renderPlatePick(cur); setPlate(cur); }
+  if(document.getElementById('startTripOverlay').classList.contains('open')) renderStartPlateSelect(document.getElementById('st_plate').dataset.prev);
 }
 
 function updateDistPreview(){
@@ -1843,10 +2102,14 @@ function paintAllStaticIcons(){
   paintIcon(document.getElementById('icNext'), 'arrow-small-right');
   paintIcon(document.querySelector('.view-toggle button[data-view="list"] .ic'), 'border-all');
   paintIcon(document.querySelector('.view-toggle button[data-view="cal"] .ic'), 'calendar-day');
-  document.querySelectorAll('.pchip .ic').forEach(el=>paintIcon(el,'car-alt'));
   paintIcon(document.getElementById('addBtn').querySelector('.ic'), 'plus');
   paintIcon(document.querySelector('.sheet-title .ic'), 'car-alt');
-  document.querySelectorAll('.plate-opt .ic').forEach(el=>paintIcon(el,'car-alt'));
+  paintIcon(document.getElementById('vehTitleIc'), 'car-alt');
+  paintIcon(document.getElementById('vehEditTitleIc'), 'car-alt');
+  paintIcon(document.querySelector('#veh_closeBtn .ic'), 'close');
+  paintIcon(document.querySelector('#veh_addBtn .ic'), 'plus');
+  paintIcon(document.querySelector('#ve_cancelBtn .ic'), 'close');
+  paintIcon(document.querySelector('#ve_saveBtn .ic'), 'disk');
   paintIcon(document.querySelector('#cancelBtn .ic'), 'close');
   paintIcon(document.querySelector('#saveBtn .ic'), 'disk');
   paintIcon(document.getElementById('exportBtn').querySelector('.ic'), 'file-export');
@@ -1883,7 +2146,8 @@ async function init(){
     document.getElementById('modeBadge').style.display='none';
     const [tripsResult, branchesResult] = await Promise.allSettled([
       apiGetTrips(),
-      fetch(CONFIG.API_URL + '/branches').then(r=>r.json())
+      fetch(CONFIG.API_URL + '/branches').then(r=>r.json()),
+      loadVehicles()
     ]);
     if(tripsResult.status === 'fulfilled'){
       trips = tripsResult.value;
@@ -1916,7 +2180,16 @@ async function init(){
   document.getElementById('st_photoBtn').onclick = startTripTakePhoto;
   document.getElementById('st_cancelBtn').onclick = ()=>document.getElementById('startTripOverlay').classList.remove('open');
   document.getElementById('st_confirmBtn').onclick = confirmStartTrip;
-  document.getElementById('st_plate').addEventListener('change', (e)=>{ document.getElementById('st_mileage').value = suggestStartMileage(e.target.value); });
+  document.getElementById('st_plate').addEventListener('change', (e)=>{
+    const sel = e.target;
+    if(sel.value === '__add'){   // + เพิ่มรถคันใหม่ → เปิดฟอร์มเพิ่มรถ แล้วเลือกคันใหม่ให้เลย
+      sel.value = sel.dataset.prev || '';
+      openVehicleEditor(null, key=>{ renderStartPlateSelect(key); document.getElementById('st_mileage').value = suggestStartMileage(key); });
+      return;
+    }
+    sel.dataset.prev = sel.value;
+    document.getElementById('st_mileage').value = suggestStartMileage(sel.value);
+  });
   document.getElementById('startTripOverlay').addEventListener('click',(e)=>{ if(e.target.id==='startTripOverlay') e.currentTarget.classList.remove('open'); });
 
   // จุดแวะ / จบทริป
@@ -1946,7 +2219,20 @@ async function init(){
   document.getElementById('exportOverlay').addEventListener('click',(e)=>{ if(e.target.id==='exportOverlay') e.currentTarget.classList.remove('open'); });
   document.getElementById('exportConfirmBtn').onclick = runExport;
 
-  document.getElementById('platePick').addEventListener('click',(e)=>{ const o=e.target.closest('.plate-opt'); if(o) setPlate(o.dataset.plate); });
+  document.getElementById('platePick').addEventListener('click',(e)=>{
+    const o = e.target.closest('.plate-opt'); if(!o) return;
+    if(o.dataset.add) return openVehicleEditor(null, key=>{ renderPlatePick(key); setPlate(key); });
+    setPlate(o.dataset.plate);
+  });
+  // รถทั้งหมด / เพิ่ม-แก้ไขรถ
+  document.getElementById('veh_closeBtn').onclick = ()=>document.getElementById('vehOverlay').classList.remove('open');
+  document.getElementById('veh_addBtn').onclick = ()=>openVehicleEditor(null);
+  document.getElementById('vehOverlay').addEventListener('click',(e)=>{ if(e.target.id==='vehOverlay') e.currentTarget.classList.remove('open'); });
+  document.getElementById('ve_cancelBtn').onclick = ()=>document.getElementById('vehEditOverlay').classList.remove('open');
+  document.getElementById('ve_saveBtn').onclick = saveVehicle;
+  document.getElementById('vehEditOverlay').addEventListener('click',(e)=>{ if(e.target.id==='vehEditOverlay') e.currentTarget.classList.remove('open'); });
+  document.querySelectorAll('#ve_active .chip').forEach(c=>c.onclick = ()=>{ vehActive = c.dataset.a==='1'; renderVehicleEditorChips(); });
+  document.getElementById('ve_plate').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); saveVehicle(); } });
   document.getElementById('f_mStart').addEventListener('input', updateDistPreview);
   document.getElementById('f_mEnd').addEventListener('input', updateDistPreview);
   // รูปประกอบทริปในฟอร์มกรอกย้อนหลัง
@@ -1970,14 +2256,14 @@ async function init(){
 
   document.getElementById('plateSeg').addEventListener('click',(e)=>{
     const b=e.target.closest('button'); if(!b) return;
+    if(b.dataset.manage) return openVehicleManager();
     document.querySelectorAll('#plateSeg button').forEach(x=>x.classList.remove('active'));
     b.classList.add('active'); curPlateFilter=b.dataset.plate; render();
   });
 
   document.getElementById('tripForm').addEventListener('submit', async (e)=>{
     e.preventDefault();
-    const plate = document.getElementById('platePick').dataset.value || 'A';
-    const plateFinal = plate === 'OTHER' ? document.getElementById('f_plateCustom').value.trim() : plate;
+    const plateFinal = document.getElementById('platePick').dataset.value || '';
     const destRaw = document.getElementById('f_dest').value.trim();
     const branch = findBranch(formBrand, destRaw);
     const destName = branch ? branch.name : destRaw;
@@ -1998,7 +2284,7 @@ async function init(){
       MileageEnd: mEndRaw===''? '' : Number(mEndRaw),
     };
     if(!payload.OutDate || !payload.UserOut || !payload.DestName){ showToast('กรอกข้อมูลที่จำเป็นให้ครบก่อนนะ'); return; }
-    if(plate==='OTHER' && !plateFinal){ showToast('กรอกทะเบียนรถให้ครบก่อนนะ'); return; }
+    if(!plateFinal){ showToast('เลือกรถที่ใช้ก่อนนะ (หรือกด "เพิ่มรถคันใหม่")'); return; }
 
     const saveBtn = document.getElementById('saveBtn');
     const saveBtnOriginal = saveBtn.innerHTML;

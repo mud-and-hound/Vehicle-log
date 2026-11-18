@@ -27,6 +27,7 @@ const SHORTCUTS = {
     { label:'เริ่มทริปสด (ถ่ายรูปจริง)', icon:'camera',   fn:'openStartTrip' },
     { label:'กรอกข้อมูลย้อนหลัง',       icon:'pencil',   fn:'openAdd' },
     { label:'Export Excel',            icon:'download', fn:'openExport' },
+    { label:'จัดการรถ (เพิ่ม / แก้ไข / ลบ)', icon:'car', fn:'openVehicleManager' },
   ],
   'vehicle-report.html': [
     { label:'ไปที่ตรวจสอบข้อมูล', icon:'alert', run: ()=>{ const el = document.getElementById('checkSec'); if(el) el.scrollIntoView({ behavior:'smooth', block:'start' }); } },

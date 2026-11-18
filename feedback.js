@@ -169,6 +169,20 @@ html.fbk-lock,html.fbk-lock body{overflow:hidden!important}
 .fbk-dmeta{font-size:11.5px;color:var(--tx3,#a39a8d);margin-top:6px;line-height:1.6}
 .fbk-dimgs img{width:100%;border-radius:12px;border:1px solid var(--line,#eee9e1);display:block;margin-top:10px;cursor:zoom-in;background:var(--panel,#fff)}
 .fbk-box{background:var(--panel,#fff);border:1px solid var(--line,#eee9e1);border-radius:14px;padding:13px;margin-top:14px}
+.fbk-thread{display:flex;flex-direction:column;gap:10px;margin:4px 0 12px;max-height:360px;overflow-y:auto}
+.fbk-thread-empty{font-size:12px;color:var(--tx3,#a39a8d);text-align:center;padding:10px 4px;line-height:1.6}
+.fbk-msg{display:flex;flex-direction:column;align-items:flex-start;max-width:88%;animation:fbkUp .3s cubic-bezier(.32,.72,0,1) both}
+.fbk-msg.mine{align-self:flex-end;align-items:flex-end}
+.fbk-bubble{background:var(--ink,#faf8f5);border:1px solid var(--line,#eee9e1);border-radius:14px 14px 14px 4px;padding:8px 11px;font-size:13.5px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.fbk-msg.mine .fbk-bubble{background:rgba(138,106,74,.1);border-color:rgba(138,106,74,.25);border-radius:14px 14px 4px 14px}
+.fbk-msg-meta{font-size:10.5px;color:var(--tx3,#a39a8d);margin-top:3px;padding:0 4px}
+.fbk-msg-del{border:none;background:none;padding:0;color:var(--tx3,#a39a8d);font:inherit;text-decoration:underline;cursor:pointer}
+.fbk-compose{display:flex;gap:8px;align-items:flex-end}
+.fbk-compose textarea{min-height:44px!important;max-height:140px;resize:none;flex:1}
+.fbk-send{width:44px;height:44px;border-radius:12px;border:none;background:var(--amber,#8a6a4a);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer}
+.fbk-send:disabled{opacity:.6}
+.fbk-send .fbk-ic{width:18px;height:18px}
+.fbk-foot .fbk-ic{width:12px;height:12px}
 .fbk-seg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 .fbk-seg button{padding:9px 4px;border-radius:10px;border:1px solid var(--line,#eee9e1);background:var(--ink,#faf8f5);font-size:12px;color:var(--tx2,#6f675c);display:flex;align-items:center;justify-content:center;gap:5px}
 .fbk-seg button.sel{border-color:var(--amber,#8a6a4a);background:var(--panel,#fff);color:var(--tx,#2e2a24);font-weight:600}
@@ -294,6 +308,20 @@ async function apiUpdate(id, p){  // แก้ไขเนื้อหาทั�
   if(isDemo){ const arr = demoGet(); const it = arr.find(x=>x.ID===id); if(it) Object.assign(it, p); demoSet(arr); return; }
   await api('/feedback/' + id, jsonOpts('PUT', p));
 }
+// ข้อความตอบกลับไปมาในเรื่องนั้น
+async function apiAddMsg(id, m){
+  if(isDemo){
+    const arr = demoGet(); const it = arr.find(x=>x.ID===id); if(!it) return;
+    const now = new Date(), pad = n=>String(n).padStart(2,'0');
+    (it.Messages = it.Messages || []).push({ ID: Date.now(), ...m, At: `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}` });
+    demoSet(arr); return;
+  }
+  await api('/feedback/' + id + '/messages', jsonOpts('POST', m));
+}
+async function apiDelMsg(id, mid){
+  if(isDemo){ const arr = demoGet(); const it = arr.find(x=>x.ID===id); if(it) it.Messages = (it.Messages||[]).filter(x=>x.ID!==mid); demoSet(arr); return; }
+  await api('/feedback/' + id + '/messages/' + mid, { method:'DELETE' });
+}
 async function apiDelete(id){
   if(isDemo){ demoSet(demoGet().filter(x=>x.ID!==id)); return; }
   await api('/feedback/' + id, { method:'DELETE' });
@@ -409,7 +437,7 @@ function renderList(body){
         ${whereLine(it)}
         <div class="fbk-text">${esc(it.Detail)}</div>
         ${imgs.length ? `<div class="fbk-thumbs">${imgs.slice(0,4).map(p=>`<img src="${esc(imgUrl(p))}" alt="" loading="lazy">`).join('')}${imgs.length>4?`<span>+${imgs.length-4}</span>`:''}</div>` : ''}
-        <div class="fbk-foot">${esc(it.Author || 'ไม่ระบุชื่อ')} · ${esc(relTime(it.CreatedAt))}${it.Reply ? ' · มีบันทึกตอบกลับ' : ''}</div>
+        <div class="fbk-foot">${esc(it.Author || 'ไม่ระบุชื่อ')} · ${esc(relTime(it.CreatedAt))}${msgCount(it) ? ` · ${icon('chat')} ${msgCount(it)} ข้อความ` : ''}</div>
       </button>`;
     }).join('');
   }
@@ -593,9 +621,52 @@ async function submitDraft(){
 }
 
 /* ---------- รายละเอียด + เปลี่ยนสถานะ ---------- */
+/* ---------- ข้อความตอบกลับ (เธรดของแต่ละเรื่อง) ---------- */
+const msgCount = it => (it.Messages || []).length + (it.Reply ? 1 : 0);
+function threadHTML(it){
+  const me = (lsGet('fbk_author') || '').trim();
+  const msgs = (it.Reply ? [{ ID:'legacy', Author:'บันทึกการดำเนินการ', Text:it.Reply, At:it.UpdatedAt, legacy:true }] : []).concat(it.Messages || []);
+  if(!msgs.length) return '<div class="fbk-thread-empty">ยังไม่มีข้อความตอบกลับ — ผู้แก้ไขตอบกลับ หรือผู้แจ้งถามเพิ่มได้ตรงนี้</div>';
+  return msgs.map(m=>{
+    const mine = !m.legacy && me && m.Author === me;
+    return `<div class="fbk-msg${mine?' mine':''}">
+      <div class="fbk-bubble">${esc(m.Text)}</div>
+      <div class="fbk-msg-meta">${esc(m.Author || 'ไม่ระบุชื่อ')} · ${esc(relTime(m.At))}${mine ? ` · <button type="button" class="fbk-msg-del" data-mid="${m.ID}">ลบ</button>` : ''}</div>
+    </div>`;
+  }).join('');
+}
+function bindThread(body, it){
+  const send = $('#fbkSend', body), ta = $('#fbkMsg', body);
+  // ช่องพิมพ์ขยายตามข้อความ
+  ta.addEventListener('input', ()=>{ ta.style.height = 'auto'; ta.style.height = Math.min(140, ta.scrollHeight) + 'px'; });
+  ta.addEventListener('keydown', e=>{ if(e.key === 'Enter' && (e.ctrlKey || e.metaKey)){ e.preventDefault(); send.click(); } });
+  send.onclick = async ()=>{
+    const text = ta.value.trim();
+    const nameEl = $('#fbkMsgName', body);
+    const author = nameEl ? nameEl.value.trim() : (lsGet('fbk_author') || '').trim();
+    if(!text){ ta.focus(); return; }
+    if(!author){ toast('ใส่ชื่อของคุณก่อนส่งข้อความ'); nameEl && nameEl.focus(); return; }
+    send.disabled = true;
+    try{
+      await apiAddMsg(it.ID, { Author: author, Text: text });
+      lsSet('fbk_author', author);
+      await loadItems();
+      renderDetail(body);
+      const th = $('#fbkThread', body); if(th) th.lastElementChild && th.lastElementChild.scrollIntoView({ block:'nearest' });
+      toast('ส่งข้อความแล้ว');
+    }catch(e){ toast('ส่งไม่สำเร็จ: ' + e.message); send.disabled = false; }
+  };
+  body.querySelectorAll('.fbk-msg-del').forEach(b=>b.onclick = async ()=>{
+    if(!confirm('ลบข้อความนี้?')) return;
+    try{ await apiDelMsg(it.ID, Number(b.dataset.mid)); await loadItems(); renderDetail(body); toast('ลบข้อความแล้ว'); }
+    catch(e){ toast('ลบไม่สำเร็จ: ' + e.message); }
+  });
+}
+
 function renderDetail(body){
   const it = S.items.find(x=>x.ID === S.detailId);
   if(!it){ body.innerHTML = '<div class="fbk-empty">ไม่พบรายการนี้ (อาจถูกลบไปแล้ว)</div>'; return; }
+  const me = (lsGet('fbk_author') || '').trim();
   body.innerHTML = `
     <div class="fbk-card-top">${kindChip(it.Kind)}${statusChip(it.Status)}<span class="fbk-id">#${it.ID}</span></div>
     ${whereLine(it)}
@@ -611,11 +682,17 @@ function renderDetail(body){
       <div class="fbk-seg" id="fbkSeg">${Object.entries(STATUSES).map(([k,l])=>`<button type="button" data-s="${k}" class="${it.Status===k?'sel':''}"><i style="background:${k==='open'?'#fab219':k==='doing'?'#2a78d6':'#0ca30c'}"></i>${l}</button>`).join('')}</div>
     </div>
     <div class="fbk-box">
-      <span class="fbk-label">บันทึกการดำเนินการ / ตอบกลับ</span>
-      <textarea id="fbkReply" maxlength="5000" style="min-height:80px" placeholder="เช่น แก้ไขแล้วในเวอร์ชันวันที่ ... / ขอข้อมูลเพิ่ม ...">${esc(it.Reply)}</textarea>
-      <button class="fbk-secondary" id="fbkSaveReply" style="width:100%;margin-top:8px">${icon('check')}บันทึก</button>
+      <span class="fbk-label">ข้อความตอบกลับ <small>— คุยกันไปมาระหว่างผู้แจ้งกับผู้แก้ไขได้</small></span>
+      <div class="fbk-thread" id="fbkThread">${threadHTML(it)}</div>
+      ${me ? '' : `<input type="text" id="fbkMsgName" maxlength="100" placeholder="ชื่อของคุณ (ระบบจำไว้ให้)" style="margin-bottom:8px">`}
+      <div class="fbk-compose">
+        <textarea id="fbkMsg" maxlength="3000" rows="1" placeholder="พิมพ์ข้อความตอบกลับ…"></textarea>
+        <button type="button" class="fbk-send" id="fbkSend" aria-label="ส่งข้อความ">${icon('send')}</button>
+      </div>
+      ${me ? `<div class="fbk-hint">ส่งในชื่อ “${esc(me)}”</div>` : ''}
     </div>`;
   $('#fbkEdit').onclick = ()=>startEdit(it);
+  bindThread(body, it);
   body.querySelectorAll('.fbk-dimgs img').forEach(img=>img.onclick = ()=>openLightbox(img.src));
   body.querySelectorAll('#fbkSeg button').forEach(b=>b.onclick = async ()=>{
     if(b.dataset.s === it.Status || S.busy) return;
@@ -624,12 +701,6 @@ function renderDetail(body){
     catch(e){ toast('เปลี่ยนสถานะไม่สำเร็จ: ' + e.message); }
     S.busy = false;
   });
-  $('#fbkSaveReply').onclick = async ()=>{
-    const v = $('#fbkReply').value;
-    const btn = $('#fbkSaveReply'); btn.disabled = true;
-    try{ await apiPatch(it.ID, { Reply: v }); it.Reply = v.trim(); renderDetail(body); toast('บันทึกแล้ว'); }
-    catch(e){ toast('บันทึกไม่สำเร็จ: ' + e.message); btn.disabled = false; }
-  };
   $('#fbkDel').onclick = async ()=>{
     if(!confirm(`ลบความคิดเห็น #${it.ID} ใช่ไหม? กู้คืนไม่ได้`)) return;
     try{ await apiDelete(it.ID); S.items = S.items.filter(x=>x.ID !== it.ID); updateBadge(); go('list'); toast('ลบแล้ว'); }

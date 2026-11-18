@@ -96,6 +96,7 @@ a{color:inherit}
 .plate-item .sw{margin-top:6px}
 .plate-item .main{flex:1;min-width:0}
 .plate-item .nm{font-size:14px;font-weight:600;font-family:var(--mono)}
+.plate-item .vtype{font-family:var(--sans);font-size:10px;font-weight:500;color:var(--tx2);border:1px solid var(--line);border-radius:5px;padding:0 5px;margin-left:7px;vertical-align:2px}
 .plate-item .meta{font-size:11.5px;color:var(--tx2);margin-top:3px;line-height:1.55}
 .plate-item .warn{font-size:11px;color:var(--tx3);margin-top:3px;display:flex;gap:4px;align-items:center}
 .plate-item .warn .ic{width:11px;height:11px;color:var(--st-warn)}
@@ -236,7 +237,9 @@ function paint(id, name){ const el=document.getElementById(id); el.innerHTML=ic(
 
 /* ====== ตั้งค่า ====== */
 const CONFIG = { API_URL: 'https://vehiclelog.mobile1234.site' };
-const PLATES = { A: '3ฒษ-7643', B: '3ฒภ-8066' };   // ต้องตรงกับหน้าบันทึกการใช้รถ
+const PLATES = { A: '3ฒษ-7643', B: '3ฒภ-8066' };   // ใช้สำรองเมื่อโหลดรายชื่อรถ (/vehicles) ไม่ได้
+let VEHICLES = [];   // รายชื่อรถจาก API: {Key, Plate, Type, TypeName, Note, Active}
+const VEHICLE_TYPES = { car:'รถยนต์', pickup:'รถกระบะ', van:'รถตู้', motorcycle:'มอเตอร์ไซค์', other:'อื่นๆ' };
 const LONG_TRIP_KM = 1000;   // ทริปเดียวเกินนี้ = ให้ตรวจสอบเลขไมค์
 const GAP_KM = 50;           // ไมค์ขาดช่วงจากทริปก่อนหน้าเกินนี้ = อาจมีการใช้รถที่ไม่ได้บันทึก
 const THAI_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
@@ -271,10 +274,12 @@ function escapeHtml(s){ return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;
 
 /* ---------- ทริป ---------- */
 const plateKey = t => (t.Plate || '').trim();
-const plateName = k => PLATES[k] || k || 'ไม่ระบุทะเบียน';
+const vehicleOf = k => VEHICLES.find(v=>v.Key===k);
+const plateName = k => { const v = vehicleOf(k); return v ? v.Plate : (PLATES[k] || k || 'ไม่ระบุทะเบียน'); };
+const typeName = k => { const v = vehicleOf(k); return v ? (VEHICLE_TYPES[v.Type] || 'อื่นๆ') : (k ? 'ยังไม่ได้เพิ่มเป็นรถ' : ''); };
 const seriesOf = k => k==='A' ? 'a' : k==='B' ? 'b' : 'o';
 const seriesColor = s => `var(--s-${s})`;
-const SERIES_NAME = { a: PLATES.A, b: PLATES.B, o: 'คันอื่นๆ' };
+const SERIES_NAME = { get a(){ return plateName('A'); }, get b(){ return plateName('B'); }, o: 'คันอื่นๆ' };
 const hasNum = v => v!==null && v!==undefined && v!=='' && !isNaN(Number(v));
 // ระยะทางของทริป = ไมค์สิ้นสุด − ไมค์เริ่ม (นับเฉพาะทริปที่จบแล้ว และเลขไมค์ครบ+ไม่ติดลบ)
 function dist(t){
@@ -282,6 +287,12 @@ function dist(t){
   if(!hasNum(t.MileageStart) || !hasNum(t.MileageEnd)) return null;
   const d = Number(t.MileageEnd) - Number(t.MileageStart);
   return d >= 0 ? d : null;
+}
+function typeSummary(rows){
+  const c = {};
+  rows.forEach(p=>{ const t = typeName(p.k); if(t) c[t] = (c[t]||0) + 1; });
+  const parts = Object.entries(c).map(([t,n])=>`${t} ${n}`);
+  return parts.length > 1 ? parts.join(' · ') + ' · ' : '';
 }
 const destOf = t => [t.DestCode, t.DestName].filter(Boolean).join(' - ') || 'ไม่ระบุปลายทาง';
 const tripLink = t => `vehicle-log-v3.html?trip=${encodeURIComponent(t.ID)}`;
@@ -458,13 +469,13 @@ function render(){
   });
   const totKm = plateRows.reduce((s,p)=>s+p.a.km,0);
   html += `<section class="sec">
-    <div class="sec-h"><h2>${svgIc('car-alt')}ปี ${beYear(year)} ใช้รถ ${plateRows.length} คัน</h2><span class="sub">แตะเพื่อดูเฉพาะคัน</span></div>
+    <div class="sec-h"><h2>${svgIc('car-alt')}ปี ${beYear(year)} ใช้รถ ${plateRows.length} คัน</h2><span class="sub">${typeSummary(plateRows)}แตะเพื่อดูเฉพาะคัน</span></div>
     ${totKm>0 ? `<div class="share" role="img" aria-label="สัดส่วนระยะทางแต่ละคัน">${plateRows.filter(p=>p.a.km>0).map(p=>`<i style="flex:${p.a.km};background:${seriesColor(seriesOf(p.k))}" title="${escapeHtml(plateName(p.k))} ${fmtInt(p.a.km)} กม. (${Math.round(p.a.km/totKm*100)}%)"></i>`).join('')}</div>` : ''}
     ${plateRows.length===0 ? '<div class="muted" style="font-size:13px">ไม่มีการใช้รถในปีนี้</div>' : plateRows.map((p,i)=>`
       <button class="plate-item${plateFilter===p.k?' sel':''}" data-i="${i}">
         <span class="sw" style="background:${seriesColor(seriesOf(p.k))}"></span>
         <span class="main">
-          <span class="nm">${escapeHtml(plateName(p.k))}</span>
+          <span class="nm">${escapeHtml(plateName(p.k))}${typeName(p.k) ? `<span class="vtype">${escapeHtml(typeName(p.k))}</span>` : ''}</span>
           <span class="meta" style="display:block">${fmtInt(p.a.trips)} เที่ยว · ออกรถ ${fmtInt(p.a.daysOut)} วัน${p.a.kmTrips?` · เฉลี่ย ${fmtAvg(p.a.km/p.a.kmTrips)} กม./เที่ยว · ${fmtAvg(p.a.km/p.a.kmDays)} กม./วันที่ออกรถ`:''}<br>ใช้ครั้งแรก ${thDate(p.first)} · ล่าสุด ${thDate(p.last)}</span>
           ${p.a.trips-p.a.kmTrips>0 ? `<span class="warn">${svgIc('triangle-warning')}ไม่มีเลขไมค์ ${p.a.trips-p.a.kmTrips} เที่ยว (ไม่ถูกนับระยะทาง)</span>` : ''}
           ${p.open ? `<span class="warn">${svgIc('clock-three')}กำลังเดินทาง/ยังไม่กดจบ ${p.open} ทริป</span>` : ''}
@@ -730,10 +741,11 @@ window.addEventListener('resize', ()=>{ clearTimeout(_rz); _rz = setTimeout(()=>
 async function load(){
   const box = document.getElementById('report');
   try{
-    const r = await fetch(CONFIG.API_URL + '/trips');
+    const [r, rv] = await Promise.all([fetch(CONFIG.API_URL + '/trips'), fetch(CONFIG.API_URL + '/vehicles').catch(()=>null)]);
     const j = await r.json();
     if(!j.ok) throw new Error('bad response');
     trips = j.data || [];
+    try{ const jv = rv && rv.ok ? await rv.json() : null; if(jv && jv.ok) VEHICLES = jv.data || []; }catch(e){}
   }catch(e){
     box.innerHTML = `<div class="err">โหลดข้อมูลทริปไม่ได้ตอนนี้<br>เช็คอินเทอร์เน็ตแล้วลองใหม่<br><button id="retryBtn">ลองใหม่</button></div>`;
     document.getElementById('retryBtn').onclick = load;
