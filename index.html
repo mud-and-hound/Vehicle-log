@@ -37,8 +37,16 @@ h1{font-size:23px;font-weight:600;text-align:center;margin:10px 0 2px;letter-spa
 .card-body p{font-size:12.5px;color:var(--tx3);margin:0;line-height:1.5}
 .card-arrow{display:none}
 
+/* มีแถบเมนูด้านบน (ui.js): ลดช่องว่างด้านบน + การ์ดค่อยๆ เลื่อนขึ้นมา */
+html{--ui-max:460px}
+html.has-uibar .wrap{padding-top:34px}
+@keyframes cardUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.wrap > .eyebrow,.wrap > h1,.cards .card{animation:cardUp .5s cubic-bezier(.32,.72,0,1) both}
+.wrap > h1{animation-delay:40ms}.cards .card:nth-child(1){animation-delay:90ms}.cards .card:nth-child(2){animation-delay:150ms}.cards .card:nth-child(3){animation-delay:210ms}
+@media (prefers-reduced-motion: reduce){.wrap > .eyebrow,.wrap > h1,.cards .card{animation:none}}
 .footer-note{margin-top:40px;font-size:11px;color:var(--tx3);text-align:center}
 </style>
+<script src="ui.js"></script>  <!-- แถบเมนู ☰ + อนิเมชันเลื่อนขึ้นลง (ต้องอยู่หลัง <style> ของหน้า) -->
 </head>
 <body>
 

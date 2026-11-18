@@ -23,7 +23,7 @@ html,body{margin:0;background:var(--ink);color:var(--tx);font-family:var(--sans)
 body{padding-bottom:100px}
 @media (min-width:680px){
   body{display:flex;flex-direction:column;align-items:center}
-  .hero,.controls,.cal-wrap,.list,.setup-note{width:100%;max-width:560px}
+  .hero,.controls,.cal-wrap,.list,.setup-note,.active-wrap,.perpage-wrap{width:100%;max-width:560px}
   .fab{position:fixed}
 }
 button{font-family:var(--sans);cursor:pointer;border:none;background:none;color:inherit}
@@ -43,6 +43,10 @@ input::placeholder{color:var(--tx3)}
 .back-link .ic{width:12px;height:12px;transform:rotate(180deg)}
 .report-link{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--amber);font-weight:500;margin:8px 0 0 14px;text-decoration:none}
 .report-link .ic{width:13px;height:13px}
+/* มีแถบเมนูด้านบน (ui.js) แล้ว: ชื่อหน้า + ลิงก์ย้ายไปอยู่ในแถบ/เมนู ☰ */
+html{--ui-max:560px}
+html.has-uibar .hero .eyebrow,html.has-uibar .hero h1,html.has-uibar .hero .back-link,html.has-uibar .hero .report-link{display:none}
+html.has-uibar .hero .stat-row{margin-top:2px}
 .demo-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--amber);background:rgba(255,176,32,.08);border:1px solid rgba(255,176,32,.3);padding:3px 9px;border-radius:var(--r3);margin-top:6px}
 .demo-badge .ic{width:11px;height:11px}
 
@@ -327,6 +331,7 @@ input::placeholder{color:var(--tx3)}
 .status-chip.done{background:rgba(61,220,132,.12);color:#3ddc84}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="ui.js"></script>  <!-- แถบเมนู ☰ + อนิเมชันเลื่อนขึ้นลง (ต้องอยู่หลัง <style> ของหน้า) -->
 </head>
 <body>
 

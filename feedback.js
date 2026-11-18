@@ -76,8 +76,10 @@ const CSS = `
 .fbk-badge.show{display:block}
 html.fbk-lock,html.fbk-lock body{overflow:hidden!important}
 
-.fbk-ov{position:fixed;inset:0;z-index:500;background:rgba(6,7,9,.55);display:none;justify-content:flex-end;font-family:var(--sans,'Prompt',sans-serif);color:var(--tx,#2e2a24)}
-.fbk-ov.open{display:flex}
+.fbk-ov{position:fixed;inset:0;z-index:500;background:rgba(6,7,9,0);display:flex;visibility:hidden;pointer-events:none;transition:background-color .3s ease, visibility 0s linear .36s;justify-content:flex-end;font-family:var(--sans,'Prompt',sans-serif);color:var(--tx,#2e2a24)}
+.fbk-ov.open{background:rgba(6,7,9,.55);visibility:visible;pointer-events:auto;transition:background-color .3s ease}
+.fbk-ov .fbk-panel{transform:translateX(102%);transition:transform .36s cubic-bezier(.32,.72,0,1)}
+.fbk-ov.open .fbk-panel{transform:none}
 .fbk-panel{width:100%;max-width:520px;height:100%;height:100dvh;background:var(--ink,#faf8f5);display:flex;flex-direction:column;box-shadow:-8px 0 30px rgba(0,0,0,.15)}
 .fbk-head{display:flex;align-items:center;gap:6px;padding:calc(10px + env(safe-area-inset-top, 0px)) 10px 10px;border-bottom:1px solid var(--line,#eee9e1);background:var(--panel,#fff);flex-shrink:0}
 .fbk-head h2{flex:1;font-size:15.5px;font-weight:600;margin:0;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -173,8 +175,8 @@ html.fbk-lock,html.fbk-lock body{overflow:hidden!important}
 .fbk-seg i{width:7px;height:7px;border-radius:50%;display:inline-block}
 
 /* ---------- วาด/มาร์กบนรูป ---------- */
-.fbk-ann{position:fixed;inset:0;height:100dvh;z-index:520;background:#15140f;display:none;flex-direction:column;font-family:var(--sans,'Prompt',sans-serif);color:#fff;user-select:none;-webkit-user-select:none}
-.fbk-ann.open{display:flex}
+.fbk-ann{position:fixed;inset:0;height:100dvh;z-index:520;background:#15140f;display:flex;visibility:hidden;opacity:0;transform:translateY(28px);transition:opacity .25s ease, transform .34s cubic-bezier(.32,.72,0,1), visibility 0s linear .34s;flex-direction:column;font-family:var(--sans,'Prompt',sans-serif);color:#fff;user-select:none;-webkit-user-select:none}
+.fbk-ann.open{visibility:visible;opacity:1;transform:none;transition:opacity .25s ease, transform .34s cubic-bezier(.32,.72,0,1)}
 .fbk-ann-top{display:flex;align-items:center;gap:8px;padding:calc(8px + env(safe-area-inset-top, 0px)) 10px 8px;flex-shrink:0}
 .fbk-ann-top h3{flex:1;margin:0;font-size:14px;font-weight:500;text-align:center;color:rgba(255,255,255,.85)}
 .fbk-ann-top button{padding:9px 14px;border-radius:10px;border:none;font-family:inherit;font-size:13.5px;cursor:pointer}
@@ -193,13 +195,25 @@ html.fbk-lock,html.fbk-lock body{overflow:hidden!important}
 .fbk-sep{width:1px;height:24px;background:rgba(255,255,255,.2);margin:0 4px}
 .fbk-ann-hint{font-size:11px;color:rgba(255,255,255,.55)}
 
-.fbk-lb{position:fixed;inset:0;z-index:530;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;cursor:zoom-out}
-.fbk-lb.open{display:flex}
+.fbk-lb{position:fixed;inset:0;z-index:530;background:rgba(0,0,0,.92);display:flex;visibility:hidden;opacity:0;transition:opacity .22s ease, visibility 0s linear .22s;align-items:center;justify-content:center;cursor:zoom-out}
+.fbk-lb.open{visibility:visible;opacity:1;transition:opacity .22s ease}
+.fbk-lb img{transform:scale(.95);transition:transform .3s cubic-bezier(.32,.72,0,1)}
+.fbk-lb.open img{transform:none}
 .fbk-lb img{max-width:100%;max-height:100dvh;object-fit:contain}
-.fbk-toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom, 0px));transform:translateX(-50%);z-index:540;background:#2e2a24;color:#fff;padding:10px 18px;border-radius:11px;
-  font:13px/1.5 var(--sans,'Prompt',sans-serif);opacity:0;pointer-events:none;transition:opacity .2s;max-width:calc(100% - 32px);text-align:center}
-.fbk-toast.show{opacity:1}
+.fbk-toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom, 0px));transform:translate(-50%,12px);z-index:540;background:#2e2a24;color:#fff;padding:10px 18px;border-radius:11px;
+  font:13px/1.5 var(--sans,'Prompt',sans-serif);opacity:0;pointer-events:none;transition:opacity .2s, transform .3s cubic-bezier(.32,.72,0,1);max-width:calc(100% - 32px);text-align:center}
+.fbk-toast.show{opacity:1;transform:translate(-50%,0)}
+@keyframes fbkIn{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+@keyframes fbkUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.fbk-body.swap{animation:fbkIn .32s cubic-bezier(.32,.72,0,1) both}
+.fbk-card{animation:fbkUp .36s cubic-bezier(.32,.72,0,1) both}
+.fbk-card:nth-of-type(2){animation-delay:35ms}.fbk-card:nth-of-type(3){animation-delay:70ms}.fbk-card:nth-of-type(4){animation-delay:105ms}
+.fbk-card:nth-of-type(5){animation-delay:140ms}.fbk-card:nth-of-type(n+6){animation-delay:175ms}
 @media (max-width:360px){ .fbk-tool{min-width:44px} }
+@media (prefers-reduced-motion: reduce){
+  .fbk-ov,.fbk-ov .fbk-panel,.fbk-ann,.fbk-lb,.fbk-lb img,.fbk-toast{transition:none!important}
+  .fbk-body.swap,.fbk-card{animation:none!important}
+}
 `;
 
 /* ---------- ยูทิล ---------- */
@@ -345,7 +359,11 @@ function openPanel(){
   render();
   loadItems().then(()=>{ if(S.view !== 'form') render(); });
 }
-function go(view, id){ S.view = view; if(id!=null) S.detailId = id; render(); $('#fbkBody').scrollTop = 0; }
+function go(view, id){
+  S.view = view; if(id!=null) S.detailId = id; render();
+  const b = $('#fbkBody'); b.scrollTop = 0;
+  b.classList.remove('swap'); void b.offsetWidth; b.classList.add('swap');   // เปลี่ยนหน้าย่อย = เนื้อหาเลื่อนเข้ามา
+}
 
 function render(){
   const back = $('#fbkBack');
@@ -798,6 +816,9 @@ function init(){
     <div class="fbk-lb" id="fbkLb"><img id="fbkLbImg" alt=""></div>
     <div class="fbk-toast" id="fbkToast" role="status"></div>`;
   document.body.appendChild(root);
+  // มีแถบเมนูด้านบน (ui.js) → ย้ายปุ่มไปอยู่ขวาสุดของแถบ
+  const slot = document.getElementById('uiBarRight');
+  if(slot) slot.appendChild($('#fbkLaunch'));
 
   $('#fbkLaunch').onclick = openPanel;
   $('#fbkClose').onclick = ()=>{ if(S.view === 'form') syncFormFields(); closeLayerUI(); };
@@ -814,6 +835,7 @@ function init(){
   $('#fbkLb').onclick = ()=>closeLayerUI();
   bindCanvas();
   loadItems();   // ดึงจำนวนเรื่องที่ค้างมาโชว์บนปุ่ม
+  window.FBK = { open: openPanel };   // ให้เมนูแฮมเบอร์เกอร์ (ui.js) เปิดหน้าความคิดเห็นได้
 }
 if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
